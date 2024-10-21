@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Labour Dashboard</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'dashboard.css' %}">
+    <!-- Bootstrap CSS for professional layout -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="dashboard-container container">
+        <!-- Header Section -->
+        <header class="dashboard-header my-4 text-center">
+            <h2>Welcome to Labour Dashboard</h2>
+            <!-- Messages Section -->
+            {% if messages %}
+            <div class="alert-container">
+                <ul class="list-unstyled">
+                    {% for message in messages %}
+                    <li class="alert alert-{{ message.tags }} my-2">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </header>
+
+        <!-- Navigation Bar -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link" href="{% url 'labour_dashboard' %}">Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">Logout</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="dashboard-content">
+            <!-- Profile Update Section -->
+            <section class="profile-section mb-4">
+                <h3>Your Profile</h3>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="email">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" value="{{ labour.email }}" required>
+                        </div>
+
+                        <div class="form-group col-md-6">
+                            <label for="phone">Phone</label>
+                            <input type="text" class="form-control" id="phone" name="phone" value="{{ labour.phone }}" required>
+                        </div>
+
+                        <div class="form-group col-md-6">
+                            <label for="experience">Experience</label>
+                            <input type="text" class="form-control" id="experience" name="experience" value="{{ labour.experience }}">
+                        </div>
+
+                        <div class="form-group col-md-6">
+                            <label for="skills">Skills</label>
+                            <select class="form-control" id="skills" name="skills" multiple>
+                                {% for skill in skills %}
+                                <option value="{{ skill.id }}" selected>{{ skill.name }}</option>
+                                {% endfor %}
+                                {% for skill in available_skills %}
+                                <option value="{{ skill.id }}">{{ skill.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="form-group col-md-6">
+                            <label for="profile_image">Profile Image</label>
+                            <input type="file" class="form-control-file" id="profile_image" name="profile_image">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update Profile</button>
+                </form>
+            </section>
+
+            <!-- Skills Section -->
+            <section class="skills-section mb-4">
+                <h3>Your Skills</h3>
+                <ul class="list-group">
+                    {% for skill in skills %}
+                    <li class="list-group-item">{{ skill.name }}</li>
+                    {% empty %}
+                    <li class="list-group-item">No skills added yet.</li>
+                    {% endfor %}
+                </ul>
+            </section>
+
+            <!-- Add New Skill Section -->
+            <section class="add-skill-section mb-4">
+                <h3>Add a New Skill</h3>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="skill_name">Skill Name</label>
+                        <input type="text" class="form-control" id="skill_name" name="skill_name" required>
+                    </div>
+                    <button type="submit" class="btn btn-success">Add Skill</button>
+                </form>
+            </section>
+
+            <!-- Booking History Section -->
+            <section class="history-section mb-4">
+                <h3>Your Booking History</h3>
+                <table class="table table-striped">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>Service</th>
+                            <th>Email</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in booking_history %}
+                        <tr>
+                            <td>{{ booking.booking_id }}</td>
+                            <td>{{ booking.service }}</td>
+                            <td>{{ booking.email }}</td>
+                            <td>{{ booking.booking_time }}</td>
+                            <td>{{ booking.status }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5">No booking history available.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+
+    <!-- Bootstrap JS for interactive components -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

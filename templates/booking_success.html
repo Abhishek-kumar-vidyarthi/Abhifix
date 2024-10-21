@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Success</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'success.css' %}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4; /* Light gray background for the whole page */
+            margin: 0;
+            padding: 20px;
+        }
+
+        .receipt {
+            max-width: 600px;
+            margin: auto;
+            background-color: #ffffff; /* White background for the receipt */
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border: 1px solid #ddd; /* Light border for the receipt */
+        }
+
+        h1 {
+            color: #007BFF; /* Blue color for the heading */
+        }
+
+        .receipt-header p {
+            margin: 5px 0; /* Margin for spacing between paragraphs */
+        }
+
+        .skills-list {
+            padding-left: 20px; /* Indentation for the list */
+        }
+
+        .thanks-msg {
+            margin-top: 20px; /* Space above the thank you message */
+            font-weight: bold; /* Make the thank you message bold */
+            color: #333; /* Dark color for the message */
+        }
+
+        .view-button {
+            display: inline-block;
+            margin-top: 20px; /* Space above the button */
+            padding: 10px 15px;
+            background-color: #007BFF; /* Button color */
+            color: #fff; /* Text color for button */
+            text-decoration: none;
+            border-radius: 5px; /* Rounded corners for the button */
+            transition: background-color 0.3s; /* Smooth transition for hover effect */
+        }
+
+        .view-button:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px; /* Space above footer */
+            font-size: 12px;
+            color: #666; /* Gray color for the footer text */
+        }
+    </style>
+    <script>
+        // JavaScript function to toggle dropdown visibility
+        function toggleDropdown() {
+            var dropdownContent = document.getElementById("dropdownContent");
+            dropdownContent.classList.toggle("show");
+        }
+
+        // Close the dropdown if the user clicks outside of it
+        window.onclick = function(event) {
+            if (!event.target.matches('.dropbtn')) {
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="receipt">
+        <h1>Booking Confirmation</h1>
+        
+        <div class="receipt-header">
+            <p><strong>Booking ID:</strong> {{ booking_id }}</p>
+            <p><strong>Service:</strong> {{ service }}</p>
+            <p><strong>Labour:</strong> {{ labour }}</p>
+            <p><strong>Estimated Arrival Time:</strong> {{ estimated_arrival }}</p>
+        </div>
+
+        <hr>
+
+        <h2>Labour Skills:</h2>
+        <ul class="skills-list">
+            {% for skill in skills %}
+                <li>{{ skill.name }}</li>
+            {% empty %}
+                <li>No skills listed.</li>
+            {% endfor %}
+        </ul>
+
+        <hr>
+
+        <p class="thanks-msg">Thank you for choosing Abhifix! We appreciate your business and look forward to serving you again.</p>
+
+        <a href="{% url 'booking_success' booking_id=booking_id %}" class="view-button">View Booking</a> 
+
+        <div class="footer">
+            <p>&copy; 2024 Home Help Services. All rights reserved.</p>
+        </div>
+    </div>
+
+</body>
+</html>

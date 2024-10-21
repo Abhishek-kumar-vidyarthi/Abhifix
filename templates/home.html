@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Page</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body>
+    <div class="main">
+        <div class="navbar">
+            <div class="icon">
+                <h2 class="logo">Abhifix</h2>
+            </div>
+            <div class="menu">
+                <ul>
+                    {% if not user.is_authenticated %}
+                    <li><a href="{% url 'login' %}">User_Login</a></li>
+                    {% endif %}
+                    <li><a href="#">ABOUT</a></li>
+                    <li><a href="{% url 'services' %}">SERVICE</a></li>
+                    <li><a href="{% url 'contact' %}">CONTACT</a></li>
+                    <li><a href="{% url 'labour_login' %}">Worker_Login</a></li>
+                    {% if user.is_authenticated %}
+                    <li class="dropdown">
+                        <a href="#" class="dropbtn">Profile</a>
+                        <div class="dropdown-content">
+                            {% if user.is_authenticated %}
+                                {% if user.labour_profile %}
+                                    <!-- Show laborer-specific options -->
+                                    <a href="{% url 'labour_dashboard' %}">Labor Dashboard</a>
+                                {% else %}
+                                    <!-- Show normal user options -->
+                                    <a href="{% url 'profile' %}">View Profile</a>
+                                    <a href="{% url 'profile' %}">Edit Profile</a>
+                                {% endif %}
+                                <a href="{% url 'history' %}">History</a>
+                                <a href="{% url 'logout' %}">Logout</a>
+                            {% else %}
+                                <a href="{% url 'login' %}">Login</a>
+                            {% endif %}
+                        </div>
+                    </li>
+                    
+                    {% endif %} 
+                </ul>
+            </div>
+        </div>
+
+        <div class="content">
+            <h1 style="text-align: left;">Online Home Help <br><span>Services</span></h1> 
+            <p class="par" style="margin-left: 20px;">
+                At Abhifix, we offer a wide range of <strong>home assistance services</strong> tailored to meet your needs. Whether you're facing a plumbing issue, electrical repair, or need help with building projects, our dedicated team is here to assist you. 
+                <br><br>
+                Experience the Abhifix difference—where quality service meets your expectations. Join our community of satisfied customers and let us take care of your home.
+            </p>
+            <button class="cn"><a href="#">JOIN US</a></button>
+        </div>
+
+        <!-- Why Choose Abhifix Section -->
+        <div class="why-choose">
+            <h2>Why Choose Abhifix</h2>
+            <div class="features-container">
+                <div class="feature">
+                    <img src="https://img.icons8.com/cotton/64/checked.png" alt="Trusted Professionals">
+                    <h3>Trusted Professionals</h3>
+                    <p>All our workers are certified, skilled, and experienced in their respective fields.</p>
+                </div>
+                <div class="feature">
+                    <img src="https://img.icons8.com/cotton/64/000000/headset.png" alt="24/7 Availability">
+                    <h3>24/7 Availability</h3>
+                    <p>We are available round the clock to meet your service needs anytime, anywhere.</p>
+                </div>
+                <div class="feature">
+                    <img src="https://img.icons8.com/cotton/64/money.png" alt="Affordable Pricing">
+                    <h3>Affordable Pricing</h3>
+                    <p>We offer competitive rates without compromising on service quality.</p>
+                </div>
+                <div class="feature">
+                    <img src="https://cdn-icons-png.flaticon.com/512/1875/1875684.png" alt="Quality Assurance">
+                    <h3>Quality Assurance</h3>
+                    <p>We guarantee high-quality service for all types of home repairs and maintenance.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Service Cards Section -->
+        <div class="available-services">
+            <h2>Available Services</h2>
+            <div class="service-container">
+                <div class="card">
+                    <img src="https://thumbs.dreamstime.com/b/indian-plumber-using-screwdriver-fixing-boiler-water-heater-working-heating-system-apartment-indian-plumber-using-335061953.jpg" alt="Plumber">
+                    <h3>Plumber</h3>
+                    <p>Expert plumbing services for your home and office needs.</p>
+                </div>
+                <div class="card">
+                    <img src="https://c8.alamy.com/comp/2RG8PGF/two-indian-male-and-female-civil-engineers-or-architect-wearing-helmet-and-vest-holding-paperwork-blueprint-at-construction-site-discussing-real-estat-2RG8PGF.jpg" alt="Builder">
+                    <h3>Builder</h3>
+                    <p>Professional builders for your construction projects.</p>
+                </div>
+                <div class="card">
+                    <img src="https://t4.ftcdn.net/jpg/01/41/71/73/360_F_141717314_WSq1TJzC98sAHTrnYejY7niRfcR6cE6y.jpg" alt="Cook">
+                    <h3>Cook</h3>
+                    <p>Home-cooked meals prepared by skilled chefs.</p>
+                </div>
+                <div class="card">
+                    <img src="https://media.istockphoto.com/id/498456340/photo/painter-in-white-dungarees-blue-t-shirt.jpg?s=612x612&w=0&k=20&c=EWfLHtOEYiW-U0BZn6s-juR3oMuz4cT1WbLuQmGBU2k=" alt="Painter">
+                    <h3>Painter</h3>
+                    <p>Quality painting services to brighten up your space.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Section -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-section about">
+                <h2>About Us</h2>
+                <p>Abhifix is your trusted provider of home assistance services. From plumbing to painting, we've got you covered.</p>
+            </div>
+            <div class="footer-section quick-links">
+                <h2>Quick Links</h2>
+                <ul>
+                    <li><a href="{% url 'login' %}">User_Login</a></li>
+                    <li><a href="#">ABOUT</a></li>
+                    <li><a href="{% url 'services' %}">SERVICE</a></li>
+                    <li><a href="{% url 'contact' %}">CONTACT</a></li>
+                </ul>
+            </div>
+            <div class="footer-section contact">
+                <h2>Contact Us</h2>
+                <p>Email: abhishekshaw595@gmail.com</p>
+                <p>Email: info@abhifix.com</p>
+                <p>Phone: +123 456 7890</p>
+            </div>
+            <div class="footer-section social">
+                <h2>Follow Us</h2>
+                <div class="social-links">
+                    <a href="#"><ion-icon name="logo-facebook"></ion-icon></a>
+                    <a href="#"><ion-icon name="logo-twitter"></ion-icon></a>
+                    <a href="https://www.instagram.com/abhishek_____vidyarthi" target="_blank"><ion-icon name="logo-instagram"></ion-icon></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2024 Abhifix. All Rights Reserved.
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/ionicons@5.4.0/dist/ionicons.js"></script>
+    
+    <script src="{% static 'script.js' %}"></script>
+    
+
+</body>
+</html>

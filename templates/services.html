@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Services</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'service.css' %}">
+    <style>
+        body {
+            background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
+        }
+        
+        .navbar {
+            background-color: #007bff;
+            padding: 10px;
+            color: white;
+        }
+
+        .navbar h2.logo {
+            display: inline;
+            margin: 0;
+            color: white;
+        }
+
+        .navbar ul {
+            list-style-type: none;
+            padding: 0;
+            float: right;
+        }
+
+        .navbar ul li {
+            display: inline;
+            margin: 0 10px;
+        }
+
+        .navbar ul li a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .search-form {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .search-input {
+            padding: 10px;
+            width: 300px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .search-button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .search-button:hover {
+            background-color: #0056b3;
+        }
+
+        .services-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .data-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin: 10px;
+            padding: 15px;
+            width: 300px;
+            text-align: center;
+        }
+
+        .data-card img.service-image {
+            max-width: 100%;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .book-button {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .book-button:hover {
+            background-color: #218838;
+        }
+
+        .review-button {
+            display: inline-block;
+            margin-left: 10px;
+            padding: 10px 15px;
+            background-color: #17a2b8;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .review-button:hover {
+            background-color: #138496;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <div class="navbar">
+        <h2 class="logo">Abhifix</h2>
+        <ul>
+            <li><a href="{% url 'home' %}">Home</a></li>
+            {% if not user.is_authenticated %}
+                <li><a href="{% url 'login' %}">User Login</a></li>
+            {% endif %}
+            <li><a href="{% url 'contact' %}">Contact</a></li>
+            <li><a href="#">About</a></li>
+            <li><a href="{% url 'labour_login' %}">Worker Login</a></li>
+            {% if user.is_authenticated %}
+            <li class="dropdown">
+                <a href="#" class="dropbtn">Profile</a>
+                <div class="dropdown-content">
+                    {% if user.is_authenticated %}
+                        {% if user.labour_profile %}
+                            <!-- Show laborer-specific options -->
+                            <a href="{% url 'labour_dashboard' %}">Labor Dashboard</a>
+                        {% else %}
+                            <!-- Show normal user options -->
+                            <a href="{% url 'profile' %}">View Profile</a>
+                            <a href="{% url 'profile' %}">Edit Profile</a>
+                        {% endif %}
+                        <a href="{% url 'history' %}">History</a>
+                        <a href="{% url 'logout' %}">Logout</a>
+                    {% else %}
+                        <a href="{% url 'login' %}">Login</a>
+                    {% endif %}
+                </div>
+            </li>
+            
+            {% endif %}
+        </ul>
+    </div>
+    <center>
+    <h1 class="text-center mt-4">Available Services</h1>
+    </center>
+
+    <form method="GET" action="{% url 'services' %}" class="search-form">
+        <input type="text" name="query" placeholder="Search..." value="{{ query }}" class="search-input">
+        <button type="submit" class="search-button">Search</button>
+    </form>
+
+    <!-- Display search results only if query is provided -->
+    {% if query %}
+        {% if labours %}
+            <div class="services-list">
+                {% for labour in labours %}
+                    <div class="data-card">
+                        <h2>Name: {{ labour.user.username }}</h2>
+                        <p>Skill: {{ labour.skills.first.name }}</p> <!-- Assuming each labour has multiple skills -->
+                        <!-- <p>Phone: {{ labour.phone }}</p> -->
+                        <p>Experience: {{ labour.experience }} years</p>
+
+                        <p>Average Rating: {{ labour.avg_rating }}</p>
+                        <!-- <p><img src="{% static 'rating.png' %}"></p> -->
+                        <a href="{% url 'labour_detail' labour.id %}" class="book-button">View Profile</a>
+
+                        {% if labour.image %}
+                            <p><img src="{{ labour.image.url }}" alt="Image of {{ labour.user.username }}" class="service-image"></p>
+                        {% else %}
+                            <p>No image available</p>
+                        {% endif %}
+                        
+                        <!-- <a href="{% url 'review_labour' labour.id %}" class="review-button" style="display: inline;">Leave a Review</a> -->
+                        <a href="{% url 'book_labour' labour.id %}" class="book-button">Book Now</a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-center">No results found for "{{ query }}".</p>
+        {% endif %}
+    {% else %}
+        <center><h3>Please search services to see results.</h3></center>
+    {% endif %}
+</body>
+</html>

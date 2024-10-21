@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Booking History</title>
+    {%load static %}
+    <link rel="stylesheet" href="{% static 'styles.css' %}"> <!-- Link to your CSS file -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .booking-list {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .booking-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .booking-item:last-child {
+            border-bottom: none; /* Remove border from last item */
+        }
+        .booking-item h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #007BFF; /* Link color */
+        }
+        .booking-item p {
+            margin: 5px 0;
+            color: #555;
+        }
+        .no-bookings {
+            text-align: center;
+            color: #888;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <h1>Your Booking History</h1>
+    <div class="booking-list">
+        {% if bookings %}
+            {% for booking in bookings %}
+                <div class="booking-item">
+                    <h3>Booking ID: {{ booking.booking_id }}</h3>
+                    <p><strong>Labour:</strong> {{ booking.labour.user.username }}</p>
+                    <p><strong>Expected Arrival:</strong> {{ booking.expected_time }}</p>
+                    <p><strong>Status:</strong> {{ booking.status }}</p>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="no-bookings">No bookings found.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

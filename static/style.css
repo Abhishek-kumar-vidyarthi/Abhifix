@@ -1,0 +1,322 @@
+/* General Styling */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    background-color: #f4f4f4;
+}
+
+a {
+    text-decoration: none;
+    color: white;
+}
+
+/* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #FF5722;
+    padding: 5px 20px; /* Reduced padding to decrease height */
+    margin-left: 0; /* Make navbar width full */
+    margin-right: 0; /* Make navbar width full */
+}
+
+.logo {
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.menu ul {
+    list-style: none;
+    display: flex;
+}
+
+.menu ul li {
+    margin: 0 15px;
+}
+
+.menu ul li a {
+    color: white;
+    padding: 8px 12px;
+}
+
+.menu ul li:hover a {
+    background-color: #e64a19;
+    border-radius: 5px;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #FF5722;
+    min-width: 120px;
+    z-index: 1;
+    right: 0; /* Align dropdown to the right edge */
+    overflow: hidden; /* Prevent content overflow */
+    border-radius: 5px;
+}
+
+.dropdown-content a {
+    color: white;
+    padding: 8px 12px;
+    display: block;
+    white-space: nowrap;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Content Section */
+.content {
+    /* margin-top: 10px; Adjust margin to fit the new navbar height */
+    padding: 20px;
+    background-color: white;
+    text-align: left;
+}
+
+.content h1 {
+    font-size: 50px;
+    color: #333;
+}
+
+.content span {
+    color: #FF5722;
+}
+
+.par {
+    font-size: 18px;
+    line-height: 1.6;
+    color: #160602; /* Change text color to match the theme */
+    margin-left: 20px;
+    padding: 15px; /* Add some padding for better spacing */
+    background: linear-gradient(145deg, #c4ea06, #ff6f61);
+
+
+    /* background-color: rgba(135, 227, 7, 0.911); Lighter background for emphasis */
+    border-radius: 10px; /* Rounded corners for 3D effect */
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2); /* Added shadow for 3D effect */
+    transform: translateY(-1px); /* Slight lift effect */
+}
+
+/* Call to Action Button */
+.cn {
+    display: inline-block;
+    margin-top: 20px;
+    background-color: #FF5722;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+}
+
+.cn:hover {
+    background-color: #e64a19;
+}
+
+.cn a {
+    color: white;
+}
+
+/* Why Choose Abhifix Section */
+.why-choose {
+    background-color: #ffffff;
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.why-choose h2 {
+    font-size: 36px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Features Container */
+.features-container {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+.feature {
+    width: 200px;
+    margin: 15px;
+    text-align: center;
+}
+
+.feature img {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 10px;
+}
+
+.feature h3 {
+    font-size: 22px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.feature p {
+    font-size: 16px;
+    color: #666;
+}
+
+/* Available Services Section */
+.available-services {
+    padding: 40px 20px;
+    background-color: #f9f9f9;
+    text-align: center;
+}
+
+.available-services h2 {
+    font-size: 36px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Card Styling */
+.service-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.card {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    width: 240px;
+    margin: 20px;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+}
+.card:hover {
+    transform: translateY(-5px); /* Move card slightly up on hover */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Increase shadow on hover */
+}
+
+.card h3 {
+    font-family: 'Arial', sans-serif;
+    font-size: 24px;
+    color: #333;
+    margin: 15px 0;
+    font-weight: bold;
+}
+
+.card p {
+    font-size: 16px;
+    color: #666;
+    padding: 0 15px 15px 15px;
+}
+
+/* Card Hover Effect */
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Footer Section */
+footer {
+    background-color: #333;
+    color: white;
+    padding: 40px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.footer-container {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.footer-section {
+    width: 30%;
+    padding: 10px;
+}
+
+.footer-section h2 {
+    font-size: 20px;
+    margin-bottom: 20px;
+}
+
+.footer-section p, .footer-section ul, .footer-section li {
+    color: #aaa;
+}
+
+.footer-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-section ul li {
+    margin-bottom: 10px;
+}
+
+.social-links a {
+    color: white;
+    font-size: 24px;
+    margin-right: 10px;
+    display: inline-block;
+}
+
+.footer-bottom {
+    background-color: #222;
+    text-align: center;
+    padding: 10px;
+    color: #aaa;
+    width: 100%;
+}
+
+.footer-bottom p {
+    margin: 0;
+}
+
+.social-links ion-icon {
+    font-size: 24px;
+}
+
+
+/* Media Queries for Responsiveness */
+@media screen and (max-width: 768px) {
+    .menu ul {
+        flex-direction: column;
+    }
+
+    .navbar {
+        padding: 5px;
+    }
+
+    .service-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .card {
+        width: 90%;
+    }
+
+    .features-container {
+        flex-direction: column;
+    }
+
+    footer {
+        flex-direction: column;
+    }
+
+    .footer-section {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+}

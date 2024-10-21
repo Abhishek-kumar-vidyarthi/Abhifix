@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'login.css' %}">
+    <script src="https://unpkg.com/ionicons@5.4.0/dist/ionicons.js"></script>
+</head>
+<body>
+    <!-- Navbar -->
+    <div class="navbar">
+        <h2 class="logo">Abhifix</h2>
+        <ul>
+            <li><a href="{% url 'home' %}">Home</a></li>
+            {% if not user_isAuthenticated %}
+                <li><a href="{% url 'login' %}">User Login</a></li>
+            {% endif %}
+            <li><a href="{% url 'services' %}">Services</a></li>
+            <li><a href="{% url 'contact' %}">Contact</a></li>
+            <li><a href="{% url 'labour_login' %}">Worker Login</a></li>
+            {% if user_isAuthenticated %}
+                <li class="dropdown">
+                    <a href="#" class="dropbtn">Profile</a>
+                    <div class="dropdown-content">
+                        <a href="{% url 'view_profile' %}">View Profile</a>
+                        <a href="#">Edit Profile</a>
+                        <a href="{% url 'logout' %}">Logout</a>
+                    </div>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+
+    <div class="login-container">
+        <h1>Login</h1>
+        
+        <!-- Display error messages -->
+        {% if messages %}
+            <div class="alert">
+                {% for message in messages %}
+                    <p class="error-message">{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" autocomplete="off" required><br>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" autocomplete="new-password" required><br>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+        
+        <p class="signup-container">Don't have an account? <a href="{% url 'signup' %}" class="signup-button">Sign up here</a></p>
+        
+        <p class="liw">Log in with</p>
+
+        <div class="iconn">
+            <a href="#"><ion-icon name="logo-facebook"></ion-icon></a>
+            <a href="#"><ion-icon name="logo-instagram"></ion-icon></a>
+            <a href="#"><ion-icon name="logo-twitter"></ion-icon></a>
+            <a href="#"><ion-icon name="logo-google"></ion-icon></a>
+            <a href="#"><ion-icon name="logo-linkedin"></ion-icon></a>
+        </div>
+    </div>
+</body>
+</html>
