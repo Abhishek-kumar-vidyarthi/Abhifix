@@ -1,0 +1,151 @@
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+.navbar {
+    background: #ff9900; /* Navbar color */
+    padding: 5px 20px; /* Add padding to the navbar */
+    display: flex; /* Use flexbox for better alignment */
+    align-items: center; /* Vertically center the items */
+    justify-content: space-between; /* Space out the logo and links */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.logo {
+    font-size: 24px; /* Increase font size for better visibility */
+    color: #fff; /* Logo color */
+    font-weight: bold;
+}
+
+.navbar ul {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    display: flex; /* Use flexbox for horizontal layout */
+    justify-content: center; /* Center the items */
+    flex-grow: 1;
+}
+
+.navbar ul li {
+    margin: 0 10px; /* Add margin between items */
+    position: relative; /* Needed for the dropdown */
+}
+
+.navbar ul li a {
+    color: #fff; /* White text for visibility */
+    text-decoration: none;
+    font-size: 18px;
+    padding: 5px 10px;
+    transition: color 0.3s; /* Smooth color transition */
+}
+
+.navbar ul li a:hover {
+    text-decoration: underline; /* Underline on hover */
+    background: rgba(255, 255, 255, 0.2); /* Light background on hover */
+    border-radius: 5px;
+}
+
+/* Dropdown styles */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9; /* Change to your preferred color */
+    min-width: 160px;
+    z-index: 1;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block; /* Show dropdown on hover */
+}
+
+.dropdown-content a {
+    color: black; /* Change to your preferred color */
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content a:hover {
+    background-color: #f1f1f1; /* Change to your preferred hover color */
+}
+
+.login-container {
+    width: 300px; /* Set a fixed width for the login box */
+    margin: 40px auto; /* Center the container with some top margin */
+    padding: 20px;
+    background: white; /* Background for the login box */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    border-radius: 8px; /* Rounded corners */
+}
+
+h1 {
+    text-align: center; /* Center the title */
+}
+
+.form-group {
+    margin-bottom: 15px; /* Space between form groups */
+}
+
+label {
+    display: block; /* Make labels block elements */
+    margin-bottom: 5px; /* Space between label and input */
+}
+
+input[type="text"], input[type="password"] {
+    width: 100%; /* Full width inputs */
+    padding: 10px; /* Padding inside inputs */
+    border: 1px solid #ccc; /* Light border */
+    border-radius: 4px; /* Rounded corners */
+}
+
+button {
+    width: 100%; /* Full width button */
+    padding: 10px;
+    background-color: #0066cc; /* Button color */
+    color: white; /* Text color */
+    border: none; /* No border */
+    border-radius: 4px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s; /* Smooth background transition */
+}
+
+button:hover {
+    background-color: #005bb5; /* Darker shade on hover */
+}
+
+.signup-container {
+    text-align: center; /* Center align the container */
+    margin-top: 15px; /* Add space above */
+}
+
+.signup-button {
+    display: inline-block; /* Make it a block-level element */
+    padding: 10px 20px; /* Padding for a button feel */
+    background-color: #ff9900; /* Button background color */
+    color: white; /* Text color */
+    font-weight: bold; /* Bold text */
+    border: none; /* Remove border */
+    border-radius: 5px; /* Rounded corners */
+    text-decoration: none; /* Remove underline */
+    transition: background-color 0.3s, transform 0.2s; /* Smooth transitions */
+}
+
+.signup-button:hover {
+    background-color: #ffcc00; /* Lighter color on hover */
+    transform: scale(1.05); /* Slightly enlarge on hover */
+}
+
+.iconn {
+    text-align: center; /* Center align the icons */
+    margin-top: 20px; /* Add space above */
+}
+
+.iconn a {
+    margin: 0 5px; /* Space between icons */
+    color: #333; /* Icon color */
+    font-size: 24px; /* Icon size */
+}

@@ -1,0 +1,91 @@
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+.navbar {
+    background: #ff9900; /* Orange background */
+    color: #fff;
+    padding: 10px 0; /* Reduced padding for a slimmer navbar */
+    text-align: center;
+    position: sticky; /* Keep it at the top */
+    top: 0;
+    z-index: 1000;
+}
+
+.navbar ul {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    display: flex; /* Flexbox for horizontal layout */
+    justify-content: center; /* Center the items */
+}
+
+.navbar ul li {
+    margin: 0 15px; /* Space between items */
+}
+
+.navbar ul li a {
+    color: #0c0101; /* White text for visibility */
+    text-decoration: none;
+    font-size: 16px; /* Slightly smaller font size */
+    transition: color 0.3s; /* Smooth transition for hover effect */
+}
+
+.navbar ul li a:hover {
+    text-decoration: underline; /* Underline on hover */
+    color: #ffcc00; /* Change color on hover for contrast */
+}
+
+.logo {
+    font-size: 24px;
+    color: #fff;
+    font-weight: bold;
+    padding: 0 20px;
+    float: left; /* Align logo to the left */
+}
+
+.container {
+    width: 80%;
+    margin: auto;
+    overflow: hidden;
+    padding-top: 20px; /* Space to avoid overlap */
+}
+
+h1 {
+    background: #333;
+    color: #fff;
+    padding: 10px 0;
+    text-align: center;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+li {
+    background: #fff;
+    margin: 0 0 10px 0;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.labour-image {
+    max-width: 200px;
+    border-radius: 5px;
+}
+
+.skills {
+    font-style: italic;
+    color: #555;
+}
+
+.no-data {
+    font-style: italic;
+    color: #888;
+}
