@@ -1,4 +1,4 @@
-<script>
+{/* <script>
     const stickers = document.querySelectorAll('.sticker');
     let currentIndex = 0;
 
@@ -14,4 +14,4 @@
     // Show the first sticker
     showSticker(currentIndex);
     setInterval(changeSticker, 5000); // Change every 5 seconds
-</script>;
+</script>; */}

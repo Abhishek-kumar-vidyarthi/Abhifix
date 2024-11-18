@@ -10,34 +10,46 @@
         body {
             background-color: #f4f4f4;
             font-family: Arial, sans-serif;
+            margin: 0; /* Remove default margin */
         }
         
         .navbar {
-            background-color: #007bff;
-            padding: 10px;
-            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #FF5722;
+            padding: 20px 20px; /* Consistent padding */
+            position: relative; /* For dropdown positioning */
+            z-index: 1000; /* Ensure navbar is above other elements */
         }
 
         .navbar h2.logo {
-            display: inline;
             margin: 0;
             color: white;
+            font-size: 24px; /* Increase logo font size */
         }
 
         .navbar ul {
             list-style-type: none;
             padding: 0;
-            float: right;
+            margin: 0; /* Remove default margin */
+            display: flex;
+            align-items: center; /* Center items vertically */
         }
 
         .navbar ul li {
-            display: inline;
-            margin: 0 10px;
+            margin: 0 15px; /* Space between menu items */
         }
 
         .navbar ul li a {
             color: white;
             text-decoration: none;
+            font-size: 16px; /* Increase font size */
+            transition: color 0.3s;
+        }
+
+        .navbar ul li a:hover {
+            color: #ddd; /* Change color on hover */
         }
 
         .search-form {
@@ -47,7 +59,8 @@
 
         .search-input {
             padding: 10px;
-            width: 300px;
+            width: 80%; /* Make input width responsive */
+            max-width: 300px; /* Limit maximum width */
             border-radius: 5px;
             border: 1px solid #ccc;
         }
@@ -70,6 +83,7 @@
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
+            padding: 20px;
         }
 
         .data-card {
@@ -78,8 +92,13 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             margin: 10px;
             padding: 15px;
-            width: 300px;
+            width: calc(33.33% - 20px); /* Adjust for margins */
             text-align: center;
+            transition: transform 0.3s; /* Animation on hover */
+        }
+
+        .data-card:hover {
+            transform: translateY(-5px); /* Lift effect on hover */
         }
 
         .data-card img.service-image {
@@ -104,20 +123,34 @@
             background-color: #218838;
         }
 
-        .review-button {
-            display: inline-block;
-            margin-left: 10px;
-            padding: 10px 15px;
-            background-color: #17a2b8;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            text-decoration: none;
-            transition: background-color 0.3s ease;
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column; /* Stack items on small screens */
+                align-items: flex-start;
+            }
+
+            .navbar ul {
+                flex-direction: column; /* Stack menu items */
+                width: 100%; /* Full width on small screens */
+            }
+
+            .navbar ul li {
+                margin: 5px 0; /* Space between items */
+            }
+
+            .data-card {
+                width: calc(50% - 20px); /* Adjust width for medium screens */
+            }
         }
 
-        .review-button:hover {
-            background-color: #138496;
+        @media (max-width: 480px) {
+            .data-card {
+                width: calc(100% - 20px); /* Full width on small screens */
+            }
+
+            .search-input {
+                width: 90%; /* Make input width responsive */
+            }
         }
     </style>
 </head>
@@ -125,41 +158,39 @@
 
     <!-- Navbar -->
     <div class="navbar">
-        <h2 class="logo">Abhifix</h2>
-        <ul>
-            <li><a href="{% url 'home' %}">Home</a></li>
-            {% if not user.is_authenticated %}
-                <li><a href="{% url 'login' %}">User Login</a></li>
-            {% endif %}
-            <li><a href="{% url 'contact' %}">Contact</a></li>
-            <li><a href="#">About</a></li>
-            <li><a href="{% url 'labour_login' %}">Worker Login</a></li>
-            {% if user.is_authenticated %}
-            <li class="dropdown">
-                <a href="#" class="dropbtn">Profile</a>
-                <div class="dropdown-content">
-                    {% if user.is_authenticated %}
+        <div class="icon">
+            <h2 class="logo">Abhifix</h2>
+        </div>
+        <div class="menu">
+            <ul>
+                {% if not user.is_authenticated %}
+                <li><a href="{% url 'login' %}">User_Login</a></li>
+                {% endif %}
+                <li><a href="#">ABOUT</a></li>
+                <li><a href="{% url 'home' %}">HOME</a></li>
+                <li><a href="{% url 'contact' %}">CONTACT</a></li>
+                <li><a href="{% url 'labour_login' %}">WORKER_LOGIN</a></li>
+                {% if user.is_authenticated %}
+                <li class="dropdown">
+                    <a href="#" class="dropbtn">Profile</a>
+                    <div class="dropdown-content">
                         {% if user.labour_profile %}
-                            <!-- Show laborer-specific options -->
                             <a href="{% url 'labour_dashboard' %}">Labor Dashboard</a>
                         {% else %}
-                            <!-- Show normal user options -->
                             <a href="{% url 'profile' %}">View Profile</a>
                             <a href="{% url 'profile' %}">Edit Profile</a>
                         {% endif %}
                         <a href="{% url 'history' %}">History</a>
                         <a href="{% url 'logout' %}">Logout</a>
-                    {% else %}
-                        <a href="{% url 'login' %}">Login</a>
-                    {% endif %}
-                </div>
-            </li>
-            
-            {% endif %}
-        </ul>
+                    </div>
+                </li>
+                {% endif %} 
+            </ul>
+        </div>
     </div>
+
     <center>
-    <h1 class="text-center mt-4">Available Services</h1>
+        <h1 class="text-center mt-4">Available Services</h1>
     </center>
 
     <form method="GET" action="{% url 'services' %}" class="search-form">
@@ -174,21 +205,16 @@
                 {% for labour in labours %}
                     <div class="data-card">
                         <h2>Name: {{ labour.user.username }}</h2>
-                        <p>Skill: {{ labour.skills.first.name }}</p> <!-- Assuming each labour has multiple skills -->
-                        <!-- <p>Phone: {{ labour.phone }}</p> -->
+                        <p>Skill: {{ labour.skills.first.name }}</p>
                         <p>Experience: {{ labour.experience }} years</p>
-
                         <p>Average Rating: {{ labour.avg_rating }}</p>
-                        <!-- <p><img src="{% static 'rating.png' %}"></p> -->
+                        <p class="price">Price:₹ {{ labour.price }}</p>
                         <a href="{% url 'labour_detail' labour.id %}" class="book-button">View Profile</a>
-
                         {% if labour.image %}
                             <p><img src="{{ labour.image.url }}" alt="Image of {{ labour.user.username }}" class="service-image"></p>
                         {% else %}
                             <p>No image available</p>
                         {% endif %}
-                        
-                        <!-- <a href="{% url 'review_labour' labour.id %}" class="review-button" style="display: inline;">Leave a Review</a> -->
                         <a href="{% url 'book_labour' labour.id %}" class="book-button">Book Now</a>
                     </div>
                 {% endfor %}

@@ -3,31 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | Abhifix</title>
+    <title>Request OTP | Abhifix</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'login.css' %}">
     <script src="https://unpkg.com/ionicons@5.4.0/dist/ionicons.js"></script>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
             background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh; /* Full viewport height */
         }
 
         .navbar {
             background-color: #FF5722; /* Navbar background color */
-            overflow: hidden;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 20px;
+            padding: 15px 20px;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         }
 
         .navbar .logo {
-            font-size: 22px;
+            font-size: 24px;
             color: #fff;
             font-weight: bold;
+            margin-right: auto;
         }
 
         .navbar ul {
@@ -45,30 +53,41 @@
             text-decoration: none;
             color: #fff;
             padding: 10px 15px;
+            transition: background-color 0.3s, transform 0.3s;
         }
 
         .navbar ul li a:hover {
             background-color: #e64a19; /* Slightly darker shade on hover */
+            transform: scale(1.05);
         }
 
-        .login-container {
-            max-width: 400px;
-            margin: 80px auto;
+        .otp-container {
+            max-width: 450px; /* Increased width */
+            height: 400px; /* Increased height */
+            margin-top: 80px; /* Adjust margin to accommodate fixed navbar */
             padding: 40px;
-            background-color: #fff;
-            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
-            border-radius: 10px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
             text-align: center;
+            transition: box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* Space between elements */
         }
 
-        .login-container h1 {
-            font-size: 32px;
+        .otp-container:hover {
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .otp-container h1 {
+            font-size: 28px; /* Adjusted font size */
             margin-bottom: 20px;
             color: #333;
         }
 
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px; /* Increased spacing */
             text-align: left;
         }
 
@@ -81,35 +100,44 @@
 
         .form-group input {
             width: 100%;
-            padding: 10px;
+            padding: 12px; /* Increased padding */
             border: 1px solid #ddd;
-            border-radius: 5px;
+            border-radius: 8px;
             font-size: 16px;
+            transition: border 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: #FF5722; /* Change border color on focus */
+            outline: none;
         }
 
         button[type="submit"] {
             background-color: #28a745;
             color: white;
             border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
+            padding: 12px; /* Increased padding */
+            border-radius: 8px;
             cursor: pointer;
             width: 100%;
             font-size: 18px;
+            transition: background-color 0.3s, transform 0.3s;
         }
 
         button[type="submit"]:hover {
             background-color: #218838;
+            transform: scale(1.05);
         }
 
         .back-to-login {
             margin-top: 15px;
-            font-size: 14px;
+            font-size: 20px;
         }
 
         .back-to-login a {
             color: #007bff;
             text-decoration: none;
+            transition: text-decoration 0.3s;
         }
 
         .back-to-login a:hover {
@@ -128,10 +156,26 @@
         @media (max-width: 768px) {
             .navbar ul {
                 flex-direction: column;
+                align-items: flex-start; /* Align items to the left */
             }
+
             .navbar ul li {
                 margin-left: 0;
                 margin-bottom: 10px;
+            }
+
+            .otp-container {
+                width: 90%; /* Make card responsive on smaller screens */
+                height: auto; /* Allow height to adjust */
+                padding: 20px; /* Adjust padding for smaller screens */
+            }
+
+            .otp-container h1 {
+                font-size: 24px; /* Adjust heading size */
+            }
+
+            button[type="submit"] {
+                font-size: 16px; /* Adjust button font size */
             }
         }
     </style>
@@ -143,7 +187,7 @@
         <div class="menu">
             <ul>
                 {% if not user.is_authenticated %}
-                <li><a href="{% url 'home' %}">Home</a></li>
+                <li><a href="{% url 'login' %}">User Login</a></li>
                 {% endif %}
                 <li><a href="#">About</a></li>
                 <li><a href="{% url 'services' %}">Services</a></li>
@@ -163,9 +207,9 @@
         </div>
     </div>
 
-    <!-- Login Form -->
-    <div class="login-container">
-        <h1>Login</h1>
+    <!-- OTP Request Form -->
+    <div class="otp-container">
+        <h1>Request OTP</h1>
 
         <!-- Display error messages -->
         {% if messages %}
@@ -176,32 +220,19 @@
             </div>
         {% endif %}
 
-        <form method="post" action="{% url 'login' %}">
+        <form method="post" action="{% url 'request_otp' %}">
             {% csrf_token %}
             <div class="form-group">
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" required>
+                <label for="email">Enter your registered email:</label>
+                <input type="email" id="email" name="email" required placeholder="example@example.com">
             </div>
-            <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            <button type="submit">Login</button>
+            <button type="submit">Request OTP</button>
         </form>
 
-        <p class="back-to-login">Don't have an account? <a href="{% url 'signup' %}">Register</a></p>
-        <p class="back-to-login">Login with OTP? <a href="{% url 'request_otp' %}">Request OTP</a></p>
- 
-
-        <!-- Social Media Icons -->
-        <p class="liw">Log in with</p>
-        <div class="iconn">
-            <a href="#"><ion-icon name="logo-facebook"></ion-icon></a>
-            <a href="#"><ion-icon name="logo-instagram"></ion-icon></a>
-            <a href="#"><ion-icon name="logo-twitter"></ion-icon></a>
-            <a href="#"><ion-icon name="logo-google"></ion-icon></a>
-            <a href="#"><ion-icon name="logo-linkedin"></ion-icon></a>
-        </div>
+        <p class="back-to-login">Back to <a href="{% url 'login' %}">Login</a></p>
     </div>
+
+    <!-- Background Decoration
+    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('https://www.transparenttextures.com/patterns/light-grey-paper.png'); opacity: 0.1;"></div> -->
 </body>
 </html>

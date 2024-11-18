@@ -19,13 +19,13 @@
             <li><a href="{% url 'contact' %}">Contact</a></li>
             <li><a href="{% url 'labour_login' %}">Worker Login</a></li>
             <li class="dropdown">
-                <a href="#" class="dropbtn">Profile</a>
+                <!-- <a href="#" class="dropbtn">Profile</a>
                 <div class="dropdown-content">
                     <a href="{% url 'profile' %}">View Profile</a>
                     <a href="{% url 'profile' %}">Edit Profile</a>
                     <a href="{% url 'history' %}">History</a>
                     <a href="{% url 'logout' %}">Logout</a>
-                </div>
+                </div> -->
             </li>
         </ul>
     </div>
@@ -33,7 +33,7 @@
     <!-- Signup Form -->
     <div class="signup-container">
         <h1>Sign Up</h1>
-        <form method="post" action="{% url 'signup' %}">
+        <form method="post" action="{% url 'signup' %}" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="form-group">
                 <label for="username">Username:</label>

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Confirmation</title>
+</head>
+<body>
+    <h1>Booking Successful!</h1>
+    <p>Booking ID: {{ booking_id }}</p>
+    <p>Service: Home Labour Service</p>
+    <p>Labour: {{ labour }}</p>
+    <p>Estimated Arrival: {{ estimated_arrival }}</p>
+    <p>Skills: {% for skill in skills %} {{ skill.name }} {% endfor %}</p>
+    <p>Total Amount: ₹{{ amount }}</p>
+
+    <p>Your booking has been confirmed. A confirmation email with the details and PDF has been sent to you.</p>
+</body>
+</html>

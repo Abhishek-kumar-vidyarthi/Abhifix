@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="{% static 'style.css' %}">
 </head>
 <body>
+
     <div class="main">
         <div class="navbar">
             <div class="icon">
@@ -16,12 +17,12 @@
             <div class="menu">
                 <ul>
                     {% if not user.is_authenticated %}
-                    <li><a href="{% url 'login' %}">User_Login</a></li>
+                    <li><a href="{% url 'login' %}">USER_LOGIN</a></li>
                     {% endif %}
                     <li><a href="#">ABOUT</a></li>
                     <li><a href="{% url 'services' %}">SERVICE</a></li>
                     <li><a href="{% url 'contact' %}">CONTACT</a></li>
-                    <li><a href="{% url 'labour_login' %}">Worker_Login</a></li>
+                    <li><a href="{% url 'labour_login' %}">WORKER_LOGIN</a></li>
                     {% if user.is_authenticated %}
                     <li class="dropdown">
                         <a href="#" class="dropbtn">Profile</a>
@@ -90,9 +91,11 @@
             <h2>Available Services</h2>
             <div class="service-container">
                 <div class="card">
-                    <img src="https://thumbs.dreamstime.com/b/indian-plumber-using-screwdriver-fixing-boiler-water-heater-working-heating-system-apartment-indian-plumber-using-335061953.jpg" alt="Plumber">
-                    <h3>Plumber</h3>
-                    <p>Expert plumbing services for your home and office needs.</p>
+                    <a href="{% url 'services' %}">
+                        <img src="https://thumbs.dreamstime.com/b/indian-plumber-using-screwdriver-fixing-boiler-water-heater-working-heating-system-apartment-indian-plumber-using-335061953.jpg" alt="Plumber">
+                        <h3>Plumber</h3>
+                        <p>Expert plumbing services for your home and office needs.</p>
+                    </a>
                 </div>
                 <div class="card">
                     <img src="https://c8.alamy.com/comp/2RG8PGF/two-indian-male-and-female-civil-engineers-or-architect-wearing-helmet-and-vest-holding-paperwork-blueprint-at-construction-site-discussing-real-estat-2RG8PGF.jpg" alt="Builder">

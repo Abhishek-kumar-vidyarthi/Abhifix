@@ -11,97 +11,63 @@
             margin: 0;
             padding: 0;
         }
-        .navbar {
-            background-color: #ff7200; /* Navbar color */
-            padding: 20px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap; /* Allow wrapping */
-        }
-        .navbar h2 {
-            color: #f0f0f0; /* Updated font color */
-            margin: 0;
-        }
-        .navbar ul {
-            list-style: none;
-            display: flex;
-            padding: 0;
-            margin: 0; /* Reset margin */
-        }
-        .navbar ul li {
-            margin-left: 20px;
-            position: relative; /* To position the dropdown */
-        }
-        .navbar ul li a {
-            color: #f0f0f0; /* Updated font color */
-            text-decoration: none;
-            font-weight: bold;
-        }
-        .navbar ul li a:hover {
-            text-decoration: underline;
-            color: #ffffff; /* Hover color for better visibility */
-        }
-        .dropdown {
-            float: right;
-            overflow: hidden;
-        }
-        .dropdown .dropbtn {
-            cursor: pointer;
-            font-size: 16px;
-            border: none;
-            outline: none;
-            color: white;
-            background-color: inherit;
-            padding: 14px 20px;
-        }
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            right: 0;
-            background-color: #f9f9f9;
-            min-width: 160px;
-            box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
-            z-index: 1;
-        }
-        .dropdown-content a {
-            float: none;
-            color: black;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-            text-align: left;
-        }
-        .dropdown-content a:hover {
-            background-color: #ddd;
-        }
-        .dropdown:hover .dropdown-content {
-            display: block;
-        }.dropdown-content {
-            display: none;
-            position: absolute;
-            background-color: #060202;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            z-index: 1;
-            min-width: 160px;
-            border-radius: 4px;
-            right: 0; /* Align to the right */
-        }
-        .dropdown-content a {
-            color: #ff7200; /* Text color for dropdown */
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-        }
-        .dropdown-content a:hover {
-    background-color: #ff7200; /* Change background color on hover */
-    color: #ffffff; /* Change text color on hover */
-    padding-left: 20px; /* Add padding for a sliding effect */
-    transition: background-color 0.3s, color 0.3s, padding-left 0.3s; /* Smooth transition */
+        /* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #FF5722;
+    padding: 5px 20px; /* Reduced padding to decrease height */
+    margin-left: 0; /* Make navbar width full */
+    margin-right: 0; /* Make navbar width full */
 }
-        .navbar ul li:hover .dropdown-content {
-            display: block; /* Show dropdown on hover */
-        }
+
+.logo {
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.menu ul {
+    list-style: none;
+    display: flex;
+}
+
+.menu ul li {
+    margin: 0 15px;
+}
+
+.menu ul li a {
+    color: white;
+    padding: 8px 12px;
+}
+
+.menu ul li:hover a {
+    background-color: #e64a19;
+    border-radius: 5px;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: grey;
+    min-width: 120px;
+    z-index: 1;
+    right: 0; /* Align dropdown to the right edge */
+    overflow: hidden; /* Prevent content overflow */
+    border-radius: 5px;
+}
+
+.dropdown-content a {
+    color: white;
+    padding: 8px 12px;
+    display: block;
+    white-space: nowrap;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
         .signup-button {
             background-color: #fff; /* Signup button color */
             color: #ff7200; /* Text color */
@@ -200,21 +166,42 @@
 </head>
 <body>
     <div class="navbar">
-        <h2>Abhifix</h2>
-        <ul>
-            <li><a href="{% url 'home' %}">Home</a></li>
-            <li><a href="{% url 'services' %}">Services</a></li>
-            <li><a href="#">About</a></li>
-            <li><a href="{% url 'contact' %}">Contact</a></li>
-            <li>
-                <a href="#" class="dropbtn">Profile</a>
-                <div class="dropdown-content">
-                    <a href="{% url 'labour_dashboard' %}">Labour Dashboard</a>
-                    <a href="#">View History</a> <!-- Link to user history -->
-                    <a href="{% url 'logout' %}">Logout</a>
-                </div>
-            </li>
-        </ul>
+        <div class="icon">
+            <h2 class="logo">Abhifix</h2>
+        </div>
+        <div class="menu">
+            <ul>
+                {% if not user.is_authenticated %}
+                <li><a href="{% url 'login' %}">USER_LOGIN</a></li>
+                {% endif %}
+                <li><a href="#">ABOUT</a></li>
+                <li><a href="{% url 'services' %}">SERVICE</a></li>
+                <li><a href="{% url 'contact' %}">CONTACT</a></li>
+                <li><a href="{% url 'labour_login' %}">WORKER_LOGIN</a></li>
+                {% if user.is_authenticated %}
+                <li class="dropdown">
+                    <a href="#" class="dropbtn">Profile</a>
+                    <div class="dropdown-content">
+                        {% if user.is_authenticated %}
+                            {% if user.labour_profile %}
+                                <!-- Show laborer-specific options -->
+                                <a href="{% url 'labour_dashboard' %}">Labor Dashboard</a>
+                            {% else %}
+                                <!-- Show normal user options -->
+                                <a href="{% url 'profile' %}">View Profile</a>
+                                <a href="{% url 'profile' %}">Edit Profile</a>
+                            {% endif %}
+                            <a href="{% url 'history' %}">History</a>
+                            <a href="{% url 'logout' %}">Logout</a>
+                        {% else %}
+                            <a href="{% url 'login' %}">Login</a>
+                        {% endif %}
+                    </div>
+                </li>
+                
+                {% endif %} 
+            </ul>
+        </div>
     </div>
 
     <div class="container">

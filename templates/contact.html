@@ -6,32 +6,230 @@
     <title>Contact Us - Home Help Service</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'contact.css' %}">
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        p {
+            text-align: center;
+        }
+
+        /* Navbar */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #FF5722;
+            padding: 20px 20px;
+            position: relative;
+            z-index: 1000;
+        }
+
+        .navbar h2.logo {
+            color: white;
+            margin: 0;
+        }
+
+        .navbar ul {
+            list-style: none;
+            display: flex;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar ul li {
+            margin-left: 15px;
+            position: relative;
+        }
+
+        .navbar ul li a {
+            color: white;
+            text-decoration: none;
+            padding: 10px;
+            white-space: nowrap;
+        }
+        .menu ul li:hover a {
+         background-color: #e64a19;
+         border-radius: 5px;
+}
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown .dropbtn {
+            background-color: transparent;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            white-space: nowrap;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: rgb(227, 145, 3);
+            min-width: 160px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1001;
+            right: 0;
+            top: 100%;
+        }
+
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #ddd;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .dropdown:hover .dropbtn {
+            background-color: #dd8469;
+        }
+
+        /* Form Styles */
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .btn-submit {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            background-color: #218838;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #333;
+            color: white;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .navbar ul {
+                flex-direction: column;
+                padding: 0;
+            }
+
+            .navbar ul li {
+                margin: 5px 0;
+            }
+
+            .container {
+                width: 95%;
+            }
+
+            .dropdown-content {
+                min-width: 100%;
+                right: 0;
+                left: 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 24px;
+            }
+
+            .btn-submit {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Navbar -->
     <div class="navbar">
-        <h2 class="logo">Abhifix</h2>
-        <ul>
-            <li><a href="{% url 'home' %}">Home</a></li>
-            <li><a href="#">About</a></li>
-            <li><a href="{% url 'services' %}">Service</a></li>
-            <li><a href="{% url 'labour_login' %}">Worker_Login</a></li>
-            {% if user.is_authenticated %}
+        <div class="icon">
+            <h2 class="logo">Abhifix</h2>
+        </div>
+        <div class="menu">
+            <ul>
+                {% if not user.is_authenticated %}
+                <li><a href="{% url 'login' %}">USER_LOGIN</a></li>
+                {% endif %}
+                <li><a href="{% url 'home' %}">HOME</a></li>
+                <li><a href="{% url 'services' %}">SERVICE</a></li>
+                <li><a href="{% url 'contact' %}">ABOUT</a></li>
+                <li><a href="{% url 'labour_login' %}">WORKER_LOGIN</a></li>
+                {% if user.is_authenticated %}
                 <li class="dropdown">
                     <a href="#" class="dropbtn">Profile</a>
                     <div class="dropdown-content">
-                        <a href="{% url 'profile' %}">View Profile</a>
-                        <a href="{% url 'profile' %}">Edit Profile</a>
-                        <a href="{% url 'history' %}">History</a>
-                        <a href="{% url 'logout' %}">Logout</a>
+                        {% if user.is_authenticated %}
+                            {% if user.labour_profile %}
+                                <!-- Show laborer-specific options -->
+                                <a href="{% url 'labour_dashboard' %}">Labor Dashboard</a>
+                            {% else %}
+                                <!-- Show normal user options -->
+                                <a href="{% url 'profile' %}">View Profile</a>
+                                <a href="{% url 'profile' %}">Edit Profile</a>
+                            {% endif %}
+                            <a href="{% url 'history' %}">History</a>
+                            <a href="{% url 'logout' %}">Logout</a>
+                        {% else %}
+                            <a href="{% url 'login' %}">Login</a>
+                        {% endif %}
                     </div>
                 </li>
-            {% else %}
-                <li><a href="{% url 'login' %}">User_Login</a></li>
-            {% endif %}
-        </ul>
+                {% endif %}
+            </ul>
+        </div>
     </div>
 
+    <!-- Contact Form Section -->
     <div class="container">
         <header>
             <h1>Contact Us</h1>
@@ -56,6 +254,8 @@
             </form>
         </main>
     </div>
+
+    <!-- Footer -->
     <footer>
         <p>&copy; {{ current_year }} Home Help Service. All rights reserved.</p>
     </footer>

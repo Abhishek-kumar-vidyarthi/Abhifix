@@ -157,3 +157,10 @@
 .search-button:hover {
     background-color: #ff7043;
 }
+.price {
+    font-size: 18px;
+    color: #FF5722;  /* Use the orange color for price to match the theme */
+    font-weight: bold;
+    margin-top: 10px;
+    text-align: center;
+}

@@ -4,13 +4,17 @@ from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import User, Labour, Booking,Review,UserProfile,Skill,History # Ensure Skill and Labour models are correctly imported
+from .models import User, Labour, Booking,Review,UserProfile,Skill,History ,Payment# Ensure Skill and Labour models are correctly imported
 from django.utils import timezone
+from datetime import timedelta
 from django.core.mail import send_mail,EmailMessage
 from django.conf import settings
 from .utils import render_to_pdf , generate_otp,send_otp # Import the utility function
 from io import BytesIO
 from django.db.models import Avg
+import razorpay
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponseBadRequest
 
 
 
@@ -21,46 +25,74 @@ def home(request):
 # Login view for users
 def login(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        user = authenticate(request, username=username, password=password)
+        # Check if the user is trying to log in with a password
+        if 'password' in request.POST:
+            username = request.POST['username']
+            password = request.POST['password']
+            user = authenticate(request, username=username, password=password)
 
-        if user:
-            # Check if the email is registered
-            if not user.email:  # Email is missing
-                messages.error(request, 'Email is not registered. Please update your profile.')
-                return redirect('profile')  # Redirect to profile update page
-        
-        if user:
-            otp = generate_otp()  # Generate OTP
-            request.session['otp'] = otp  # Store OTP in session
-            request.session['username'] = username  # Store username in session
-            
-            send_otp(user.email, otp)  # Send OTP via email
-            
-            return redirect('otp_verification')  # Redirect to OTP verification page
-        else:
-            messages.error(request, 'Invalid username or password')
-    
+            if user is not None:
+                auth_login(request, user)
+                return redirect('home')  # Redirect to home page after successful login
+            else:
+                messages.error(request, 'Invalid username or password.')
+
+        # Check if the user is requesting an OTP
+        elif 'email' in request.POST:
+            email = request.POST['email']
+            try:
+                user = User.objects.get(email=email)
+                otp = generate_otp()
+                request.session['otp'] = otp
+                request.session['user_email'] = email
+
+                # Send OTP to the user's email
+                send_otp(email, otp)
+
+                messages.success(request, 'An OTP has been sent to your email.')
+                return redirect('otp_verification')  # Redirect to the OTP verification page
+            except User.DoesNotExist:
+                messages.error(request, 'No user associated with this email.')
+
+    # For GET requests or if POST processing fails, render the login page
     return render(request, 'login.html')
 
 def otp_verification(request):
     if request.method == 'POST':
         entered_otp = request.POST.get('otp')
         generated_otp = request.session.get('otp')
-        
+
         if str(entered_otp) == str(generated_otp):
-            # Log in the user
-            username = request.session.get('username')
-            user = User.objects.get(username=username)
-            if user:
-                auth_login(request, user)  # Log the user in
-                return redirect('home')  # Redirect to home page
+            # Fetch the user and log them in
+            email = request.session.get('user_email')
+            user = User.objects.get(email=email)
+            auth_login(request, user)
+            del request.session['otp']  # Clear OTP from session after successful login
+            del request.session['user_email']  # Clear email from session
+            return redirect('home')
         else:
-            messages.error(request, 'Invalid OTP')
-    
+            messages.error(request, 'Invalid OTP. Please try again.')
+
     return render(request, 'otp_verification.html')
 
+def request_otp(request):
+    if request.method == 'POST':
+        user_email = request.POST.get('email')  # Get email from user input
+        try:
+            user = User.objects.get(email=user_email)  # Ensure the user exists
+            otp = generate_otp()  # Generate OTP
+            request.session['otp'] = otp  # Save OTP in session
+            request.session['user_email'] = user_email  # Save user email in session
+            
+            # Send OTP email
+            send_otp(user_email, otp)
+
+            messages.success(request, 'An OTP has been sent to your email.')
+            return redirect('otp_verification')  # Redirect to the OTP verification page
+        except User.DoesNotExist:
+            messages.error(request, 'No user associated with this email.')
+
+    return render(request, 'request_otp.html')  # Render the OTP request form
 @login_required
 def resend_otp(request):
     # Send OTP to the user
@@ -70,27 +102,31 @@ def resend_otp(request):
 @login_required
 def profile(request):
     user = request.user
-    user_profile = user.profile  # Assuming a OneToOne relationship with UserProfile
+    user_profile = user.profile  # Assuming OneToOne relationship with UserProfile
 
     # Redirect to labor dashboard if the user is a laborer
     if hasattr(user, 'labour_profile'):
         return redirect('labour_dashboard')
-    # Handle profile update
+
+    # Handle profile update when the request method is POST
     if request.method == 'POST':
         # Get data from the form
-        email = request.POST.get('email', user.email)
-        username = request.POST.get('username', user.username)
-        phone = request.POST.get('phone', user_profile.phone)
-        address = request.POST.get('address', user_profile.address)
+        phone = request.POST.get('phone', user_profile.phone)  # Default to existing phone if not provided
+        address = request.POST.get('address', user_profile.address)  # Default to existing address if not provided
+        profile_picture = request.FILES.get('profile_picture')  # Get uploaded file, if any
 
-        # Update user details
-        user.email = email
-        user.username = username
-        user_profile.phone = phone
-        user_profile.address = address
-        
-        user.save()
+        # Only update the user_profile fields if the data is provided or changed
+        if phone != user_profile.phone:
+            user_profile.phone = phone
+
+        if address != user_profile.address:
+            user_profile.address = address
+
+        if profile_picture:  # If there's a new profile picture
+            user_profile.profile_picture = profile_picture
+
         user_profile.save()  # Save the UserProfile model
+
         messages.success(request, 'Profile updated successfully!')
         return redirect('profile')  # Redirect to the profile view after saving
 
@@ -105,6 +141,7 @@ def user_signup(request):
         email = request.POST.get('email')
         password1 = request.POST.get('password1')
         password2 = request.POST.get('password2')
+        profile_photo = request.FILES.get('profile_photo')
 
         # Check if email is provided
         if not email:
@@ -123,9 +160,10 @@ def user_signup(request):
 
         # Create the user if validations pass
         user = User.objects.create_user(username=username, email=email, password=password1)
+        UserProfile.objects.create(user=user, profile_photo=profile_photo if profile_photo else None)  # Create profile
         auth_login(request, user)  # Log in the user after successful signup
         messages.success(request, "Signup successful. You are now logged in.")
-        return redirect('home')  # Redirect to home or any other page after signup
+        return redirect('login.html')  # Redirect to home or any other page after signup
 
     return render(request, 'signup.html')  # Render the form for GET requests
 
@@ -268,40 +306,118 @@ def book_labour(request, labour_id):
             labour=labour,
             expected_time=expected_time,
             email=email,
-            status='successful',  # Set status to successful
-            # booking_id=str(uuid.uuid4()),  # Example for unique booking_id
+            status='pending',  # Set status to pending until payment is completed
         )
-
-        # Generate PDF for booking confirmation
-        pdf_content = render_to_pdf('booking_success.html', {
-            'booking_id': booking.booking_id,
-            'service': 'Home Labour Service',
-            'labour': labour.user.username,
-            'estimated_arrival': booking.expected_time,
-            'skills': labour.skills.all(),
-        })
-
-        # Send confirmation email with PDF attachment
-        send_booking_email(booking, pdf_content)
-
 
         # Log the booking action to the history
         History.objects.create(
             user=request.user,
             action_type='Booking',
-            service='Home Labour Service',
+            service='Home Help Service',
             details=f"Booked {labour.user.username} for {booking.expected_time}"
         )
 
-        # Redirect to a success page with the booking ID
-        return redirect('booking_success', booking_id=booking.booking_id)
+        # Redirect to the payment page
+        return redirect('payment_page', booking_id=booking.booking_id)
 
     return render(request, 'book_labour.html', {'labour': labour})
 
+@login_required
+def payment_page(request, booking_id):
+    booking = get_object_or_404(Booking, booking_id=booking_id)
 
-def send_booking_email(booking, pdf_content):
+    
+    labour = booking.labour
+
+    client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+    total_amount = labour.price if labour and labour.price else 0  # Use booking amount dynamically
+
+    if request.method == 'POST':
+        # Convert amount to paise
+        amount = int(total_amount * 100)
+
+        # Create a Razorpay order
+        razorpay_order = client.order.create(dict(amount=amount, currency='INR', payment_capture='1'))
+
+        # Save the order ID to the booking
+        booking.razorpay_order_id = razorpay_order['id']
+        booking.save()
+
+        # Pass Razorpay details to the template
+        return render(request, 'payment_page.html', {
+            'booking': booking,
+            'razorpay_order_id': razorpay_order['id'],
+            'razorpay_key_id': settings.RAZORPAY_KEY_ID,
+            'amount': total_amount  # Use INR for display
+        })
+
+    # Render page for GET requests
+    return render(request, 'payment_page.html', {
+        'booking': booking,
+        'razorpay_order_id': None,
+        'razorpay_key_id': settings.RAZORPAY_KEY_ID,
+        'amount': total_amount
+    })
+
+    
+    
+    
+@csrf_exempt
+def payment_success(request, booking_id):
+    booking = get_object_or_404(Booking, booking_id=booking_id)
+
+    if request.method == 'POST':
+        razorpay_order_id = request.POST.get('razorpay_order_id')
+        razorpay_payment_id = request.POST.get('razorpay_payment_id')
+        razorpay_signature = request.POST.get('razorpay_signature')
+
+        # Verify the payment with Razorpay
+        client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+
+        try:
+            client.utility.verify_payment_signature({
+                'razorpay_order_id': razorpay_order_id,
+                'razorpay_payment_id': razorpay_payment_id,
+                'razorpay_signature': razorpay_signature,
+            })
+            
+            # Update booking status if payment is verified
+            booking.razorpay_payment_id = razorpay_payment_id
+            booking.status = 'successful'  # Change status to successful
+            booking.save()
+
+            # Generate PDF for booking confirmation
+            pdf_content = render_to_pdf('booking_success.html', {
+                'booking_id': booking.booking_id,
+                'service': 'Home Labour Service',
+                'labour': booking.labour.user.username,
+                'estimated_arrival': booking.expected_time,
+                'skills': booking.labour.skills.all(),
+                'amount': booking.labour.price, # Amount in INR
+            })
+
+            # Send confirmation email with PDF attachment
+            send_booking_email(booking, pdf_content, amount=booking.labour.price)
+
+            # Log the booking action to the history
+            History.objects.create(
+                user=request.user,
+                action_type='Payment',
+                service='Home Labour Service',
+                details=f"Payment of ₹{booking.labour.price} for Booking ID {booking.booking_id} was successful."
+            )
+
+            messages.success(request, 'Your payment has been processed successfully!')
+            return redirect('booking_success', booking_id=booking.booking_id)
+
+        except Exception as e:
+            messages.error(request, f'Payment verification failed: {str(e)}')
+
+    return render(request, 'payment_failure.html')  # Create a simple template for payment failure
+
+def send_booking_email(booking, pdf_content, amount):
     subject = 'Booking Confirmation'
-    message = f'Dear {booking.user.username},\n\nYour booking has been confirmed.\nBooking ID: {booking.booking_id}'
+    message = f'Dear {booking.user.username},\n\nYour booking has been confirmed.\nBooking ID: {booking.booking_id}\nAmount Paid: ₹{amount}\n\nThank you for choosing our service!'
 
     email = EmailMessage(
         subject,
@@ -322,14 +438,14 @@ def send_booking_email(booking, pdf_content):
 @login_required
 def booking_success(request, booking_id):
     # Fetch the booking using the booking_id (assuming it's a string field in the model)
-    booking = get_object_or_404(Booking, booking_id=booking_id)  # Use booking_id if it's a custom field
+    booking = get_object_or_404(Booking, booking_id=booking_id)
 
     context = {
-        'booking_id': booking.booking_id,  # Assuming this is the correct field
-        'service': 'Home Labour Service',  # Static value or fetched from another model
-        'labour': booking.labour.user.username,  # Assuming `labour` has a `user` with `username`
+        'booking_id': booking.booking_id,
+        'service': 'Home Labour Service',
+        'labour': booking.labour.user.username,
         'estimated_arrival': booking.expected_time,
-        'skills': booking.labour.skills.all(),  # Fetching related skills
+        'skills': booking.labour.skills.all(),
     }
 
     if request.GET.get('download') == 'pdf':
@@ -348,11 +464,15 @@ def services(request):
         # If no search query, retrieve all labour records
         labours = Labour.objects.all()
      # Calculate average rating for each labour
-    for labour in labours:
-        labour.avg_rating = labour.reviews.aggregate(Avg('rating'))['rating__avg'] or 'N/A'
     
+    for labour in labours:
+        avg_rating = labour.reviews.aggregate(Avg('rating'))['rating__avg']
+        # Check if avg_rating is not None and round it to one decimal place
+        labour.avg_rating = round(avg_rating, 1) if avg_rating is not None else 'N/A'
+
     return render(request, 'services.html', {'labours': labours, 'query': query}) 
 
+@login_required
 def profile(request):
     return render(request,'profile.html')
 def contact(request):
@@ -397,6 +517,19 @@ def review_labour(request, labour_id):
         'labour': labour,
     })
 
+@login_required
 def labour_detail(request, labour_id):
     labour = get_object_or_404(Labour, id=labour_id)
     return render(request, 'labour_detail.html', {'labour': labour})
+
+
+
+
+
+
+def transaction_history(request):
+    payments = Payment.objects.filter(user=request.user).order_by('-created_at')
+    context = {
+        'payments': payments
+    }
+    return render(request, 'transaction_history.html', context)

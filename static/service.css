@@ -1,82 +1,57 @@
-/* Navbar styles */
 .navbar {
-    background-color: #ff7200;
-    overflow: hidden;
-    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #FF5722;
+    padding: 5px 20px; /* Reduced padding to decrease height */
+    margin-left: 0; /* Make navbar width full */
+    margin-right: 0; /* Make navbar width full */
 }
 
-.navbar h2.logo {
-    float: left;
+.logo {
     color: white;
     font-size: 24px;
-    margin: 0;
+    font-weight: bold;
 }
 
-.navbar ul {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    float: right;
+.menu ul {
+    list-style: none;
+    display: flex;
 }
 
-.navbar ul li {
-    float: left;
-    margin-left: 20px;
+.menu ul li {
+    margin: 0 15px;
 }
 
-.navbar ul li a {
-    display: block;
+.menu ul li a {
     color: white;
-    text-align: center;
-    padding: 14px;
-    text-decoration: none;
+    padding: 8px 12px;
 }
 
-.navbar ul li a:hover {
-    background-color: #555;
-    color: white;
+.menu ul li:hover a {
+    background-color: #e64a19;
+    border-radius: 5px;
 }
 
-.navbar .dropdown {
-    float: left;
-    overflow: hidden;
-}
-
-.navbar .dropdown .dropbtn {
-    font-size: 16px;
-    border: none;
-    outline: none;
-    color: white;
-    padding: 14px 20px;
-    background-color: inherit;
-    font-family: inherit;
-    margin: 0;
-}
-
-.navbar .dropdown-content {
+.dropdown-content {
     display: none;
     position: absolute;
-    background-color: #f9f9f9;
-    min-width: 160px;
-    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    background-color: #FF5722;
+    min-width: 120px;
     z-index: 1;
+    right: 0; /* Align dropdown to the right edge */
+    overflow: hidden; /* Prevent content overflow */
+    border-radius: 5px;
 }
 
-.navbar .dropdown-content a {
-    float: none;
-    color: black;
-    padding: 12px 16px;
-    text-decoration: none;
+.dropdown-content a {
+    color: white;
+    padding: 8px 12px;
     display: block;
-    text-align: left;
+    white-space: nowrap;
 }
 
-.navbar .dropdown-content a:hover {
-    background-color: #ddd;
-}
-
-.navbar .dropdown:hover .dropdown-content {
+.dropdown:hover .dropdown-content {
     display: block;
 }
 

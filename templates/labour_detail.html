@@ -4,56 +4,70 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Labour Details</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f4f4;
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8f9fa;
             margin: 0;
             padding: 0;
         }
-        
+
         .container {
             width: 80%;
             max-width: 1200px;
             margin: 50px auto;
-            background-color: #fff;
-            padding: 30px;
+            background-color: #ffffff;
             border-radius: 15px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
         }
 
-        .labour-info {
+        .header {
+            background: linear-gradient(135deg, #007bff, #6dbfdf);
+            color: white;
             text-align: center;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #eee;
-            margin-bottom: 20px;
+            padding: 40px 20px;
         }
 
-        .labour-info img {
+        .header img {
             max-width: 150px;
-            border-radius: 50%;
-            border: 4px solid #007bff;
+            height: 200px;
+             border-radius: 20px; 
+            border: 4px solid white;
         }
 
-        .labour-info h2 {
-            font-size: 28px;
+        .header h2 {
+            font-size: 32px;
             margin: 15px 0;
-            color: #333;
         }
 
-        .labour-info p {
+        .header p {
             font-size: 18px;
-            color: #666;
             margin: 5px 0;
         }
 
         .skills {
-            margin-top: 10px;
-            padding: 10px 20px;
+            margin-top: 15px;
+            padding: 10px 15px;
             background-color: orange;
             color: white;
             border-radius: 5px;
             display: inline-block;
+            font-weight: bold;
+        }
+
+        .details {
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .details p {
+            font-size: 18px;
+            color: #333;
+            margin: 8px 0;
         }
 
         h3 {
@@ -66,31 +80,44 @@
             list-style: none;
             padding: 0;
             margin: 0;
+            width: 100%;
         }
 
         ul.reviews li {
             background-color: #f9f9f9;
-            padding: 15px;
-            border-radius: 8px;
+            padding: 20px;
+            border-radius: 10px;
             margin-bottom: 15px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+        }
+
+        .reviewer-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 15px;
+            border: 2px solid #007bff;
         }
 
         ul.reviews li p {
             font-size: 16px;
-            margin: 8px 0 0;
+            margin: 0;
             color: #555;
         }
 
         .no-reviews {
             font-size: 18px;
             color: #888;
+            text-align: center;
+            margin-top: 20px;
         }
 
         .footer {
             text-align: center;
-            margin-top: 30px;
-            padding-top: 20px;
+            padding: 20px;
+            background-color: #f1f1f1;
             border-top: 1px solid #eee;
         }
 
@@ -108,9 +135,10 @@
         .go-back-btn:hover {
             background-color: #0056b3;
         }
+        
         .review-button {
             display: inline-block;
-            margin-left: 10px;
+            margin: 10px 0;
             padding: 10px 15px;
             background-color: #17a2b8;
             color: white;
@@ -129,8 +157,13 @@
                 width: 95%;
             }
 
-            .labour-info img {
+            .header img {
                 max-width: 120px;
+            }
+
+            .reviewer-img {
+                width: 40px;
+                height: 40px;
             }
         }
     </style>
@@ -138,27 +171,35 @@
 <body>
 
 <div class="container">
-    <div class="labour-info">
+    <div class="header">
         <img src="{{ labour.image.url }}" alt="Labour Image">
         <h2>{{ labour.user.username }}</h2>
         <p class="skills">Skills: {% for skill in labour.skills.all %} {{ skill.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
         <p>Experience: {{ labour.experience }} years</p>
-        <p>Phone: {{ labour.phone }}</p>
-        <p>Email: {{ labour.email }}</p>
     </div>
 
-    <h3>Reviews ({{ labour.reviews.count }})</h3>
-    <ul class="reviews">
-        {% for review in labour.reviews.all %}
-            <li>
-                <p>{{ review.rating }} stars</p>
-                <p>Comment: {{ review.comment }}</p>
-            </li>
-        {% empty %}
-            <p class="no-reviews">No reviews yet.</p>
-        {% endfor %}
-    </ul>
-    <a href="{% url 'review_labour' labour.id %}" class="review-button">Leave a Review</a>
+    <div class="details">
+        <h3>Details</h3>
+        <p>Phone: {{ labour.phone }}</p>
+        <p>Email: {{ labour.email }}</p>
+
+        <h3>Reviews ({{ labour.reviews.count }})</h3>
+        <ul class="reviews">
+            {% for review in labour.reviews.all %}
+                <li>
+                    <!-- <img src="{{ review.user.profile.image.url }}" alt="Reviewer Image" class="reviewer-img"> -->
+                    <div>
+                        <p><strong>{{ review.user.username }}</strong> - {{ review.rating }} stars</p>
+                        <p>Comment: {{ review.comment }}</p>
+                    </div>
+                </li>
+            {% empty %}
+                <li class="no-reviews">No reviews yet.</li>
+            {% endfor %}
+        </ul>
+        <a href="{% url 'review_labour' labour.id %}" class="review-button">Leave a Review</a>
+    </div>
+
     <div class="footer">
         <a href="{% url 'services' %}" class="go-back-btn">Go Back</a>
     </div>

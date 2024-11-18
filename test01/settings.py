@@ -142,3 +142,8 @@ EMAIL_USE_TLS = True  # Use TLS
 EMAIL_HOST_USER = 'abhishekshaw595@gmail.com'
 EMAIL_HOST_PASSWORD = 'itsc budw mife rsyk'
 DEFAULT_FROM_EMAIL = 'abhishekshaw595@gmail.com'
+
+
+
+RAZORPAY_KEY_ID = 'rzp_test_qRwrfdLBNDfLRV'
+RAZORPAY_KEY_SECRET = 'kjlZAL5kpTnQaRU1GI2YTpI5'

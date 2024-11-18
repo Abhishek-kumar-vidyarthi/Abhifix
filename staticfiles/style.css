@@ -4,7 +4,11 @@ body {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    background-color: #f4f4f4;
+    background-color: #f4f4f4; /* Fallback color */
+    background-image: url("{% static 'media/images/t2.jpeg' %}"); /* Replace with your image path */
+    background-size: cover; /* Ensures the image covers the entire body */
+    background-repeat: no-repeat; /* Prevents the image from repeating */
+    background-position: center; /* Centers the image */
 }
 
 a {

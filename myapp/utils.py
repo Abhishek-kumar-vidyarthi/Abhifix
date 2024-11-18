@@ -25,9 +25,11 @@ def render_to_pdf(template_src, context_dict):
 def generate_otp():
     return random.randint(100000, 999999) 
 
+
 def send_otp(email, otp):
     subject = 'Your OTP for Login Verification'
-    message = f'Your OTP for login is {otp}.'
+    message = f"Your OTP code is: {otp}. It is valid for 10 minutes."
+
     email_from = 'settings.DEFAULT_FROM_EMAIL'
     recipient_list = [email]
     send_mail(subject, message, email_from, recipient_list)
