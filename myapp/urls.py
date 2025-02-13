@@ -23,8 +23,9 @@ urlpatterns = [
     path('request-otp/', views.request_otp, name='request_otp'),
     path('labour/<int:labour_id>/review/', review_labour, name='review_labour'),
     path('labour/<int:labour_id>/', views.labour_detail, name='labour_detail'),
-    path('payment/<str:booking_id>/', payment_page, name='payment_page'),
-    path('payment/success/<str:booking_id>/', payment_success, name='payment_success'),
+    path('payment/<str:booking_id>/', views.payment_page, name='payment_page'),
+    path('payment/success/<str:booking_id>/', views.payment_success, name='payment_success'),
+    path('payment/failure/', views.payment_failure, name='payment_failure'),
     path('transaction/history/', views.transaction_history, name='transaction_history'),
 
 ]

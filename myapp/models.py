@@ -36,13 +36,15 @@ class UserProfile(models.Model):
 # Booking model for handling booking details
 class Booking(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    labour = models.ForeignKey(Labour, on_delete=models.CASCADE) 
+    labour = models.ForeignKey('Labour', on_delete=models.CASCADE) 
     email = models.EmailField(max_length=254, null=True, blank=True)
     booking_id = models.CharField(max_length=20, default='', unique=True, editable=False)
-    expected_time = models.DateTimeField(default=timezone.now) 
-    booking_time = models.DateTimeField(auto_now_add=True) 
-    status = models.CharField(max_length=20, default='pending')  # Add status field
-    amount=models.IntegerField(default=0)
+    expected_time = models.DateTimeField(default=timezone.now)
+    booking_time = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, default='pending')
+    amount = models.IntegerField(default=0)
+    razorpay_order_id = models.CharField(max_length=255, null=True, blank=True)  # Add this field
+
     def save(self, *args, **kwargs):
         if not self.booking_id:
             self.booking_id = str(uuid.uuid4())[:5]  # Generate unique 5-character ID

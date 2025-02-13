@@ -6,9 +6,9 @@ body {
     box-sizing: border-box;
     background-color: #f4f4f4; /* Fallback color */
     background-image: url("{% static 'media/images/t2.jpeg' %}"); /* Replace with your image path */
-    background-size: cover; /* Ensures the image covers the entire body */
-    background-repeat: no-repeat; /* Prevents the image from repeating */
-    background-position: center; /* Centers the image */
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
 a {
@@ -22,9 +22,7 @@ a {
     justify-content: space-between;
     align-items: center;
     background-color: #FF5722;
-    padding: 5px 20px; /* Reduced padding to decrease height */
-    margin-left: 0; /* Make navbar width full */
-    margin-right: 0; /* Make navbar width full */
+    padding: 10px 20px;
 }
 
 .logo {
@@ -33,9 +31,16 @@ a {
     font-weight: bold;
 }
 
+.menu {
+    display: flex;
+    align-items: center;
+}
+
 .menu ul {
     list-style: none;
     display: flex;
+    margin: 0;
+    padding: 0;
 }
 
 .menu ul li {
@@ -58,8 +63,8 @@ a {
     background-color: #FF5722;
     min-width: 120px;
     z-index: 1;
-    right: 0; /* Align dropdown to the right edge */
-    overflow: hidden; /* Prevent content overflow */
+    right: 0;
+    overflow: hidden;
     border-radius: 5px;
 }
 
@@ -76,7 +81,6 @@ a {
 
 /* Content Section */
 .content {
-    /* margin-top: 10px; Adjust margin to fit the new navbar height */
     padding: 20px;
     background-color: white;
     text-align: left;
@@ -94,16 +98,13 @@ a {
 .par {
     font-size: 18px;
     line-height: 1.6;
-    color: #160602; /* Change text color to match the theme */
+    color: #160602;
     margin-left: 20px;
-    padding: 15px; /* Add some padding for better spacing */
+    padding: 15px;
     background: linear-gradient(145deg, #c4ea06, #ff6f61);
-
-
-    /* background-color: rgba(135, 227, 7, 0.911); Lighter background for emphasis */
-    border-radius: 10px; /* Rounded corners for 3D effect */
-    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2); /* Added shadow for 3D effect */
-    transform: translateY(-1px); /* Slight lift effect */
+    border-radius: 10px;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+    transform: translateY(-1px);
 }
 
 /* Call to Action Button */
@@ -118,10 +119,6 @@ a {
 
 .cn:hover {
     background-color: #e64a19;
-}
-
-.cn a {
-    color: white;
 }
 
 /* Why Choose Abhifix Section */
@@ -203,10 +200,6 @@ a {
     height: 180px;
     object-fit: cover;
 }
-.card:hover {
-    transform: translateY(-5px); /* Move card slightly up on hover */
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Increase shadow on hover */
-}
 
 .card h3 {
     font-family: 'Arial', sans-serif;
@@ -222,7 +215,6 @@ a {
     padding: 0 15px 15px 15px;
 }
 
-/* Card Hover Effect */
 .card:hover {
     transform: translateY(-5px);
     box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.15);
@@ -239,40 +231,9 @@ footer {
     align-items: flex-start;
 }
 
-.footer-container {
-    display: flex;
-    width: 100%;
-    justify-content: space-between;
-}
-
 .footer-section {
     width: 30%;
     padding: 10px;
-}
-
-.footer-section h2 {
-    font-size: 20px;
-    margin-bottom: 20px;
-}
-
-.footer-section p, .footer-section ul, .footer-section li {
-    color: #aaa;
-}
-
-.footer-section ul {
-    list-style: none;
-    padding: 0;
-}
-
-.footer-section ul li {
-    margin-bottom: 10px;
-}
-
-.social-links a {
-    color: white;
-    font-size: 24px;
-    margin-right: 10px;
-    display: inline-block;
 }
 
 .footer-bottom {
@@ -283,23 +244,21 @@ footer {
     width: 100%;
 }
 
-.footer-bottom p {
-    margin: 0;
-}
-
-.social-links ion-icon {
+.social-links a {
+    color: white;
     font-size: 24px;
+    margin-right: 10px;
 }
-
 
 /* Media Queries for Responsiveness */
 @media screen and (max-width: 768px) {
     .menu ul {
         flex-direction: column;
+        align-items: flex-start;
     }
 
     .navbar {
-        padding: 5px;
+        flex-wrap: wrap;
     }
 
     .service-container {
@@ -317,6 +276,7 @@ footer {
 
     footer {
         flex-direction: column;
+        align-items: center;
     }
 
     .footer-section {

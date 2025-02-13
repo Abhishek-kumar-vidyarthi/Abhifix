@@ -4,7 +4,7 @@ from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import User, Labour, Booking,Review,UserProfile,Skill,History ,Payment# Ensure Skill and Labour models are correctly imported
+from .models import User, Labour, Booking,Review,UserProfile,Skill,History ,Payment# Ensure Skill and Labour models are 
 from django.utils import timezone
 from datetime import timedelta
 from django.core.mail import send_mail,EmailMessage
@@ -285,8 +285,9 @@ def logout(request):
 
 @login_required
 def book_labour(request, labour_id):
-    labour = get_object_or_404(Labour, id=labour_id)
 
+    labour = get_object_or_404(Labour, id=labour_id)
+    
     if request.method == 'POST':
         full_name = request.POST.get('full_name')
         email = request.POST.get('email')
@@ -322,46 +323,71 @@ def book_labour(request, labour_id):
 
     return render(request, 'book_labour.html', {'labour': labour})
 
+
+
 @login_required
 def payment_page(request, booking_id):
     booking = get_object_or_404(Booking, booking_id=booking_id)
-
-    
     labour = booking.labour
 
     client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
-    total_amount = labour.price if labour and labour.price else 0  # Use booking amount dynamically
+    total_amount = booking.amount or (labour.price if labour and labour.price else 0)
 
     if request.method == 'POST':
-        # Convert amount to paise
-        amount = int(total_amount * 100)
+        amount_in_paise = int(total_amount * 100)
+        try:
+            # Create Razorpay order
+            razorpay_order = client.order.create({
+                'amount': amount_in_paise,
+                'currency': 'INR',
+                'payment_capture': '1'  # Auto-capture payment
+            })
+            print(f"Razorpay Order: {razorpay_order}")  # Debug API response
 
-        # Create a Razorpay order
-        razorpay_order = client.order.create(dict(amount=amount, currency='INR', payment_capture='1'))
+            # Save Razorpay order ID to the booking
+            booking.razorpay_order_id = razorpay_order['id']
+            booking.save()
+            print(f"Saved Razorpay Order ID: {booking.razorpay_order_id}")  # Debug saved ID
 
-        # Save the order ID to the booking
-        booking.razorpay_order_id = razorpay_order['id']
-        booking.save()
+            # Define razorpay_order_id for the template
+            razorpay_order_id = razorpay_order['id']
+            print(f"Order ID Passed to Template: {razorpay_order_id}")  # Debug
 
-        # Pass Razorpay details to the template
+            # Render the payment page with Razorpay details
+            return render(request, 'payment_page.html', {
+                'booking': booking,
+                'razorpay_order_id': razorpay_order_id,  # Pass the order ID
+                'razorpay_key_id': settings.RAZORPAY_KEY_ID,
+                'amount': total_amount,
+            })
+
+        except razorpay.errors.BadRequestError as e:
+            print(f"Razorpay Bad Request Error: {str(e)}")  # Debug errors
+            messages.error(request, f"Bad request to Razorpay: {str(e)}")
+        except razorpay.errors.ServerError as e:
+            print(f"Razorpay Server Error: {str(e)}")  # Debug errors
+            messages.error(request, f"Razorpay server error: {str(e)}")
+        except Exception as e:
+            print(f"Unexpected Error: {str(e)}")  # Debug errors
+            messages.error(request, f"An unexpected error occurred: {str(e)}")
+
+        # If there's an error, redirect back to the payment page with an error message
         return render(request, 'payment_page.html', {
             'booking': booking,
-            'razorpay_order_id': razorpay_order['id'],
-            'razorpay_key_id': settings.RAZORPAY_KEY_ID,
-            'amount': total_amount  # Use INR for display
+            'error': 'Unable to initialize payment. Please try again later.',
+            'amount': total_amount,
         })
 
-    # Render page for GET requests
+    # For GET requests, render the payment page
     return render(request, 'payment_page.html', {
         'booking': booking,
-        'razorpay_order_id': None,
+        'razorpay_order_id': booking.razorpay_order_id,
         'razorpay_key_id': settings.RAZORPAY_KEY_ID,
-        'amount': total_amount
+        'amount': total_amount,
     })
 
     
-    
-    
+
 @csrf_exempt
 def payment_success(request, booking_id):
     booking = get_object_or_404(Booking, booking_id=booking_id)
@@ -371,50 +397,60 @@ def payment_success(request, booking_id):
         razorpay_payment_id = request.POST.get('razorpay_payment_id')
         razorpay_signature = request.POST.get('razorpay_signature')
 
-        # Verify the payment with Razorpay
-        client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
-
         try:
+            # Verify Razorpay payment
+            client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
             client.utility.verify_payment_signature({
                 'razorpay_order_id': razorpay_order_id,
                 'razorpay_payment_id': razorpay_payment_id,
                 'razorpay_signature': razorpay_signature,
             })
-            
-            # Update booking status if payment is verified
+
+            # Update booking status
             booking.razorpay_payment_id = razorpay_payment_id
-            booking.status = 'successful'  # Change status to successful
+            booking.status = 'successful'
             booking.save()
 
-            # Generate PDF for booking confirmation
+            print(f"Order ID Passed to Template: {razorpay_order['id']}")
+
+            # Generate PDF receipt
             pdf_content = render_to_pdf('booking_success.html', {
                 'booking_id': booking.booking_id,
-                'service': 'Home Labour Service',
                 'labour': booking.labour.user.username,
-                'estimated_arrival': booking.expected_time,
-                'skills': booking.labour.skills.all(),
-                'amount': booking.labour.price, # Amount in INR
+                'expected_time': booking.expected_time,
+                'amount': booking.labour.price,
             })
 
-            # Send confirmation email with PDF attachment
+            # Send confirmation email with PDF receipt
             send_booking_email(booking, pdf_content, amount=booking.labour.price)
 
-            # Log the booking action to the history
+            # Log payment in history
             History.objects.create(
                 user=request.user,
                 action_type='Payment',
-                service='Home Labour Service',
+                service='Home Help Service',
                 details=f"Payment of ₹{booking.labour.price} for Booking ID {booking.booking_id} was successful."
             )
 
-            messages.success(request, 'Your payment has been processed successfully!')
+            messages.success(request, 'Payment successful!')
             return redirect('booking_success', booking_id=booking.booking_id)
 
+        except razorpay.errors.SignatureVerificationError:
+            messages.error(request, 'Payment verification failed. Please try again.')
+            return redirect('payment_failure')
+
         except Exception as e:
-            messages.error(request, f'Payment verification failed: {str(e)}')
+            messages.error(request, f'An error occurred: {str(e)}')
+            return redirect('payment_failure')
 
-    return render(request, 'payment_failure.html')  # Create a simple template for payment failure
+    return render(request, 'payment_failure.html')
 
+
+
+def payment_failure(request):
+    return render(request, 'payment_failure.html', {
+        'message': 'Unfortunately, your payment could not be processed. Please try again or contact support.',
+    })
 def send_booking_email(booking, pdf_content, amount):
     subject = 'Booking Confirmation'
     message = f'Dear {booking.user.username},\n\nYour booking has been confirmed.\nBooking ID: {booking.booking_id}\nAmount Paid: ₹{amount}\n\nThank you for choosing our service!'
@@ -533,3 +569,5 @@ def transaction_history(request):
         'payments': payments
     }
     return render(request, 'transaction_history.html', context)
+
+

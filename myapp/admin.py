@@ -24,6 +24,50 @@ class Myprofile(admin.ModelAdmin):
         return obj.user.email
     user_email.short_description = 'Email'
 
+from django.contrib import admin
+from .models import Payment
+
+class PaymentAdmin(admin.ModelAdmin):
+    list_display = ('booking_id', 'user', 'labour', 'amount', 'status', 'paid', 'created_at')
+    list_filter = ('status', 'paid', 'created_at', 'labour')
+    search_fields = ('booking_id', 'user__username', 'razorpay_order_id')
+    ordering = ('-created_at',)
+    list_editable = ('status', 'paid')
+    
+    # Optionally, you can create fieldsets for better form layout in the admin
+    fieldsets = (
+        (None, {
+            'fields': ('user', 'labour', 'booking_id', 'amount', 'razorpay_order_id', 'razorpay_payment_id', 'razorpay_signature', 'paid', 'status')
+        }),
+        ('Dates', {
+            'fields': ('created_at',),
+            'classes': ('collapse',),
+        }),
+    )
+
+class BookingAdmin(admin.ModelAdmin):
+    list_display = ('booking_id', 'user', 'labour', 'razorpay_order_id', 'status')
+    fields = ('booking_id', 'user', 'labour', 'email', 'amount', 'razorpay_order_id', 'status')
+
+admin.site.register(Payment, PaymentAdmin)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 admin.site.register(Labour, LabourAdmin)
 admin.site.register(Skill)
 admin.site.register(Booking)
