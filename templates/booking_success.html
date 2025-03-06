@@ -29,14 +29,12 @@
             margin-bottom: 20px;
         }
 
-        .header img {
-            max-width: 100px;
-        }
-
         .header h1 {
-            font-size: 24px;
+            font-size: 32px;
             color: #FF5722; /* Abhifix theme color */
             margin: 5px 0;
+            font-weight: bold;
+            text-transform: uppercase;
         }
 
         .header h2 {
@@ -49,7 +47,8 @@
         }
 
         .details p {
-            margin: 5px 0;
+            margin: 10px 0;
+            font-size: 16px;
         }
 
         .details strong {
@@ -63,15 +62,17 @@
 
         .skills ul {
             list-style: disc;
+            padding-left: 20px;
         }
 
         .skills li {
             margin: 5px 0;
+            font-size: 14px;
         }
 
         .payment-details {
             margin-top: 30px;
-            padding: 10px;
+            padding: 15px;
             background-color: #f9f9f9;
             border: 1px solid #ddd;
             border-radius: 5px;
@@ -81,6 +82,11 @@
             font-size: 20px;
             color: #333;
             margin-bottom: 10px;
+        }
+
+        .payment-details p {
+            margin: 8px 0;
+            font-size: 16px;
         }
 
         .footer {
@@ -94,6 +100,13 @@
             margin: 5px 0;
         }
 
+        .redirect-message {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #555;
+        }
+
         @media print {
             body {
                 margin: 0;
@@ -105,13 +118,29 @@
             }
         }
     </style>
+    {% if not is_email %}  <!-- Only include JavaScript for browser rendering -->
+    <script>
+        // JavaScript to redirect after 10 seconds
+        let countdown = 10;
+        function updateCountdown() {
+            document.getElementById('countdown').textContent = countdown;
+            if (countdown === 0) {
+                window.location.href = "{% url 'home' %}";  // Redirect to home page
+            } else {
+                countdown--;
+                setTimeout(updateCountdown, 1000);  // Update every second
+            }
+        }
+        // Start the countdown when the page loads
+        window.onload = updateCountdown;
+    </script>
+    {% endif %}
 </head>
 <body>
     <div class="receipt">
-        <!-- Header with Logo and Title -->
+        <!-- Header with Text Logo -->
         <div class="header">
-            <img src="{% static 'logo.png' %}" alt="Company Logo"> <!-- Add your logo -->
-            <h1>Booking Receipt</h1>
+            <h1>Abhifix</h1>
             <h2>Home Help Services - Powered by Abhifix</h2>
         </div>
 
@@ -141,12 +170,30 @@
         <div class="payment-details">
             <h2>Payment Details</h2>
             <p><strong>Payment Method:</strong> {{ payment_method }}</p>
-            <p><strong>Amount Paid:</strong> ${{ amount_paid }}</p>
+            <p><strong>Amount Paid:</strong> ₹{{ amount_paid }}</p>
             <p><strong>Transaction ID:</strong> {{ transaction_id }}</p>
+            <p><strong>Payment Status:</strong> Successful</p>
         </div>
 
+        <!-- Additional Information -->
+        <div class="details">
+            <h3>Additional Information:</h3>
+            <p><strong>Customer Name:</strong> {{ user_name }}</p>
+            <p><strong>Customer Email:</strong> {{ user_email }}</p>
+            <p><strong>Booking Date:</strong> {{ booking_date }}</p>
+        </div>
+
+        <!-- Redirect Message (Only for browser rendering) -->
+        {% if not is_email %}
+        <div class="redirect-message">
+            <p>You will be redirected to the home page in <span id="countdown">10</span> seconds.</p>
+            <p>If you are not redirected, <a href="{% url 'home' %}">click here</a>.</p>
+        </div>
+        {% endif %}
+
         <div class="footer">
-            <p>Thank you for choosing Abhifix!</p>
+            <p>Thank you for choosing Abhifix! We appreciate your business.</p>
+            <p>For any queries, please contact us at <strong>support@abhifix.com</strong> or call <strong>+91 12345 67890</strong>.</p>
             <p>&copy; 2024 Home Help Services. All rights reserved.</p>
         </div>
     </div>

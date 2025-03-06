@@ -5,28 +5,197 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Labour Dashboard</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'dashboard.css' %}">
-    <!-- Bootstrap CSS for professional layout -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Custom Styles */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        header {
+            background-color: #007bff;
+            color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        header h2 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .alert-container {
+            margin-top: 15px;
+        }
+
+        .alert {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .navbar {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .nav-link {
+            color: #007bff !important;
+            font-weight: 500;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background-color: #e9f5ff;
+            text-decoration: none;
+        }
+
+        section {
+            margin-bottom: 30px;
+        }
+
+        h3 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #007bff;
+        }
+
+        form {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-control {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+
+        select.form-control {
+            height: auto;
+            padding: 10px;
+        }
+
+        button.btn-primary {
+            background-color: #007bff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: 500;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        button.btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #007bff;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            header h2 {
+                font-size: 24px;
+            }
+
+            .navbar-nav {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .form-control {
+                font-size: 12px;
+            }
+
+            h3 {
+                font-size: 20px;
+            }
+
+            table {
+                font-size: 14px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="dashboard-container container">
-        <!-- Header Section -->
-        <header class="dashboard-header my-4 text-center">
-            <h2>Welcome to Labour Dashboard</h2>
-            <!-- Messages Section -->
+    <div class="container">
+        <header class="text-center">
+            <h2>Welcome, {{ labour.user.username }}</h2>
             {% if messages %}
-            <div class="alert-container">
-                <ul class="list-unstyled">
+                <div class="alert-container">
                     {% for message in messages %}
-                    <li class="alert alert-{{ message.tags }} my-2">{{ message }}</li>
+                        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
                     {% endfor %}
-                </ul>
-            </div>
+                </div>
             {% endif %}
         </header>
 
-        <!-- Navigation Bar -->
         <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
             <ul class="navbar-nav">
                 <li class="nav-item"><a class="nav-link" href="{% url 'labour_dashboard' %}">Dashboard</a></li>
@@ -35,109 +204,114 @@
             </ul>
         </nav>
 
-        <!-- Main Content -->
-        <main class="dashboard-content">
-            <!-- Profile Update Section -->
-            <section class="profile-section mb-4">
-                <h3>Your Profile</h3>
-                <form method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <div class="form-row">
-                        <div class="form-group col-md-6">
-                            <label for="email">Email</label>
-                            <input type="email" class="form-control" id="email" name="email" value="{{ labour.email }}" required>
-                        </div>
-
-                        <div class="form-group col-md-6">
-                            <label for="phone">Phone</label>
-                            <input type="text" class="form-control" id="phone" name="phone" value="{{ labour.phone }}" required>
-                        </div>
-
-                        <div class="form-group col-md-6">
-                            <label for="experience">Experience</label>
-                            <input type="text" class="form-control" id="experience" name="experience" value="{{ labour.experience }}">
-                        </div>
-
-                        <div class="form-group col-md-6">
-                            <label for="skills">Skills</label>
-                            <select class="form-control" id="skills" name="skills" multiple>
-                                {% for skill in skills %}
+        <!-- Profile Update Section -->
+        <section>
+            <h3>Your Profile</h3>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-6">
+                        <label>Email</label>
+                        <input type="email" class="form-control" name="email" value="{{ labour.email }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label>Phone</label>
+                        <input type="text" class="form-control" name="phone" value="{{ labour.phone }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label>Experience (Years)</label>
+                        <input type="text" class="form-control" name="experience" value="{{ labour.experience }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label>Hourly Rate (₹)</label>
+                        <input type="number" class="form-control" name="price" value="{{ labour.price }}" step="0.01" required>
+                    </div>
+                    <div class="col-md-12">
+                        <label>Profile Image</label>
+                        <input type="file" class="form-control" name="image">
+                        {% if labour.image %}
+                            <small>Current Image: <a href="{{ labour.image.url }}" target="_blank">{{ labour.image.name }}</a></small>
+                        {% else %}
+                            <small>No image uploaded.</small>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-12">
+                        <label>Skills</label>
+                        <select class="form-control" name="skills" multiple>
+                            {% for skill in skills %}
                                 <option value="{{ skill.id }}" selected>{{ skill.name }}</option>
-                                {% endfor %}
-                                {% for skill in available_skills %}
+                            {% endfor %}
+                            {% for skill in available_skills %}
                                 <option value="{{ skill.id }}">{{ skill.name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-                        <div class="form-group col-md-6">
-                            <label for="profile_image">Profile Image</label>
-                            <input type="file" class="form-control-file" id="profile_image" name="profile_image">
-                        </div>
+                            {% endfor %}
+                        </select>
                     </div>
-                    <button type="submit" class="btn btn-primary">Update Profile</button>
-                </form>
-            </section>
+                </div>
+                <button type="submit" class="btn btn-primary mt-3">Update Profile</button>
+            </form>
+        </section>
 
-            <!-- Skills Section -->
-            <section class="skills-section mb-4">
-                <h3>Your Skills</h3>
-                <ul class="list-group">
-                    {% for skill in skills %}
-                    <li class="list-group-item">{{ skill.name }}</li>
+        <!-- Payment Section -->
+        <section>
+            <h3>Payment Status</h3>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Payment ID</th>
+                        <th>Amount</th>
+                        <th>Client</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in pending_payments %}
+                    <tr>
+                        <td>{{ payment.id }}</td>
+                        <td>₹{{ payment.amount }}</td>
+                        <td>{{ payment.user.email }}</td>
+                        <td>{{ payment.status }}</td>
+                    </tr>
                     {% empty %}
-                    <li class="list-group-item">No skills added yet.</li>
+                    <tr>
+                        <td colspan="4">No pending payments.</td>
+                    </tr>
                     {% endfor %}
-                </ul>
-            </section>
+                </tbody>
+            </table>
+        </section>
 
-            <!-- Add New Skill Section -->
-            <section class="add-skill-section mb-4">
-                <h3>Add a New Skill</h3>
-                <form method="post">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <label for="skill_name">Skill Name</label>
-                        <input type="text" class="form-control" id="skill_name" name="skill_name" required>
-                    </div>
-                    <button type="submit" class="btn btn-success">Add Skill</button>
-                </form>
-            </section>
-
-            <!-- Booking History Section -->
-            <section class="history-section mb-4">
-                <h3>Your Booking History</h3>
-                <table class="table table-striped">
-                    <thead class="thead-dark">
-                        <tr>
-                            <th>Booking ID</th>
-                            <th>Service</th>
-                            <th>Email</th>
-                            <th>Time</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for booking in booking_history %}
-                        <tr>
-                            <td>{{ booking.booking_id }}</td>
-                            <td>{{ booking.service }}</td>
-                            <td>{{ booking.email }}</td>
-                            <td>{{ booking.booking_time }}</td>
-                            <td>{{ booking.status }}</td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="5">No booking history available.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </section>
-        </main>
+        <!-- Booking History Section -->
+        <section>
+            <h3>Your Booking History</h3>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>Service</th>
+                        <th>Email</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in booking_history %}
+                    <tr>
+                        <td>{{ booking.booking_id }}</td>
+                        <td>{{ booking.service }}</td>
+                        <td>{{ booking.email }}</td>
+                        <td>{{ booking.booking_time }}</td>
+                        <td>{{ booking.status }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5">No booking history available.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
     </div>
 
-    <!-- Bootstrap JS for interactive components -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

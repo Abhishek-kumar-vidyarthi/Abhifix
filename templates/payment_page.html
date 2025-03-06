@@ -5,28 +5,113 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment Page</title>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .payment-container {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+
+        .details {
+            text-align: left;
+            margin-bottom: 1.5rem;
+        }
+
+        .details p {
+            margin: 0.5rem 0;
+            font-size: 1rem;
+            color: #555;
+        }
+
+        .details p strong {
+            color: #333;
+        }
+
+        #pay-button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #pay-button:hover {
+            background-color: #0056b3;
+        }
+
+        .footer {
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: #777;
+        }
+
+        .footer a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-    <h1>Payment for Booking ID: {{ booking.booking_id }}</h1>
-    <p>Amount: ₹{{ amount }}</p>
+    <div class="payment-container">
+        <h1>Payment for Booking ID: {{ booking.booking_id }}</h1>
+        
+        <div class="details">
+            <p><strong>Labour Name:</strong> {{ booking.labour.user.username }}</p>
+            <p><strong>Service:</strong> Home Help Service</p>
+            <p><strong>Expected Time:</strong> {{ booking.expected_time }}</p>
+            <p><strong>Amount:</strong> ₹{{ amount }}</p>
+        </div>
 
-    <form id="razorpay-form" method="POST" action="{% url 'payment_success' booking.booking_id %}">
-        {% csrf_token %}
-        <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
-        <input type="hidden" name="razorpay_order_id" id="razorpay_order_id">
-        <input type="hidden" name="razorpay_signature" id="razorpay_signature">
-        <button type="button" id="pay-button">Pay Now</button>
-    </form>
+        <form id="razorpay-form" method="POST" action="{% url 'payment_success' booking.booking_id %}">
+            {% csrf_token %}
+            <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
+            <input type="hidden" name="razorpay_order_id" id="razorpay_order_id">
+            <input type="hidden" name="razorpay_signature" id="razorpay_signature">
+            <button type="button" id="pay-button">Pay Now</button>
+        </form>
+
+        <div class="footer">
+            <p>By proceeding, you agree to our <a href="#">Terms and Conditions</a>.</p>
+        </div>
+    </div>
 
     <script>
         document.getElementById('pay-button').onclick = function (e) {
             var options = {
                 "key": "{{ razorpay_key_id }}",
-                "amount": "{{ amount * 100 }}",
+                "amount": "{{ amount_in_paise }}",  // Amount in paise
                 "currency": "INR",
-                "name": "Your Company Name",
+                "name": "Home Help Service",
                 "description": "Payment for Booking ID: {{ booking.booking_id }}",
-                "order_id": "{{ razorpay_order_id }}",  // Ensure this is correctly passed
+                "order_id": "{{ razorpay_order_id }}",  // Razorpay order ID
                 "handler": function (response) {
                     document.getElementById('razorpay_payment_id').value = response.razorpay_payment_id;
                     document.getElementById('razorpay_order_id').value = response.razorpay_order_id;
@@ -38,10 +123,10 @@
                     "email": "{{ request.user.email }}",
                 },
                 "theme": {
-                    "color": "#F37254"
+                    "color": "#007bff"  // Theme color matching the button
                 }
             };
-    
+
             var rzp = new Razorpay(options);
             rzp.open();
             e.preventDefault();

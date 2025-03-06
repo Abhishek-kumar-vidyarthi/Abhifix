@@ -18,7 +18,9 @@ class Labour(models.Model):
     skills = models.ManyToManyField(Skill, related_name='labours', blank=True)
     experience = models.CharField(max_length=100, null=True)
     email = models.EmailField(max_length=254, null=True, blank=True)
-    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00) 
+    price = models.DecimalField(max_digits=10, decimal_places=2, null=True,blank=True) 
+    is_available = models.BooleanField(default=True) 
+    last_booking_time = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return self.user.username if self.user else "Unnamed Labour"
@@ -76,14 +78,14 @@ class Review(models.Model):
 class Payment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     labour = models.ForeignKey('Labour', on_delete=models.CASCADE)
-    booking_id = models.CharField(max_length=100)
+    booking = models.ForeignKey(Booking, on_delete=models.CASCADE, default=1)  # Use ForeignKey here
     amount = models.FloatField()
     razorpay_order_id = models.CharField(max_length=100)
     razorpay_payment_id = models.CharField(max_length=100, blank=True, null=True)
     razorpay_signature = models.CharField(max_length=100, blank=True, null=True)
     paid = models.BooleanField(default=False)
-    status = models.CharField(max_length=100, default="Pending")
+    status = models.CharField(max_length=100,  choices=[('Pending', 'Pending'), ('Paid', 'Paid')], default='Pending')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Payment {self.booking_id} by {self.user.username}"
+        return f"Payment for Booking {self.booking.booking_id} by {self.user.username}"

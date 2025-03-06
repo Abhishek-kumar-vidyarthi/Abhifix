@@ -27,7 +27,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
   '127.0.0.1',
+  'localhost',
   'abhifix.onrender.com',
+  'abhifix.netify.com',
 
 ]
 
@@ -35,6 +37,8 @@ ALLOWED_HOSTS = [
 # Application definition
 
 INSTALLED_APPS = [
+    'admin_interface',
+    'colorfield',  # Required for admin_interface
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -42,7 +46,25 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'myapp.apps.MyappConfig',
+    # 'django_cron',
+    'channels',
 ]
+
+# Admin Interface Theme Settings
+X_FRAME_OPTIONS = "SAMEORIGIN"  # Required for admin_interface
+
+# Configure ASGI application
+ASGI_APPLICATION = 'test01.asgi.application'
+
+# Use Redis as the channel layer
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('127.0.0.1', 6379)],  # Redis server address
+        },
+    },
+}
 
 MIDDLEWARE = [
    'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -54,6 +76,9 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# Enable compression and caching for static files
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 ROOT_URLCONF = 'test01.urls'
 
@@ -111,11 +136,12 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+USE_TZ = True  # Enable timezone support
+TIME_ZONE = 'Asia/Kolkata'  # Set your timezone, e.g., '
 
 USE_I18N = True
 
-USE_TZ = True
+
 
 
 # Static files (CSS, JavaScript, Images)
@@ -145,5 +171,5 @@ DEFAULT_FROM_EMAIL = 'abhishekshaw595@gmail.com'
 
 
 
-RAZORPAY_KEY_ID = 'rzp_test_grsaGOxSHQPcVX'
-RAZORPAY_KEY_SECRET = 'IwAYgSqFID1LUlIIctoNGHYI'
+RAZORPAY_KEY_ID = 'rzp_test_zDBhptlYOVfkvz'
+RAZORPAY_KEY_SECRET = 'CdNuXpn2nPBUDCsV7ka0d6gh'

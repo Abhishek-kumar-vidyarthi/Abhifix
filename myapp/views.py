@@ -15,6 +15,7 @@ from django.db.models import Avg
 import razorpay
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponseBadRequest
+from .forms import ProfileForm
 
 
 
@@ -99,41 +100,57 @@ def resend_otp(request):
     send_otp(request.user)
     messages.success(request, "A new OTP has been sent to your email.")
     return redirect('otp_verification')  # Redirect back to the OTP verification page
+
+
+
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.core.files.storage import default_storage
+from .models import UserProfile
+
 @login_required
 def profile(request):
-    user = request.user
-    user_profile = user.profile  # Assuming OneToOne relationship with UserProfile
+    # Fetch or create the UserProfile object for the logged-in user
+    user_profile, created = UserProfile.objects.get_or_create(user=request.user)
 
-    # Redirect to labor dashboard if the user is a laborer
-    if hasattr(user, 'labour_profile'):
-        return redirect('labour_dashboard')
-
-    # Handle profile update when the request method is POST
     if request.method == 'POST':
-        # Get data from the form
-        phone = request.POST.get('phone', user_profile.phone)  # Default to existing phone if not provided
-        address = request.POST.get('address', user_profile.address)  # Default to existing address if not provided
-        profile_picture = request.FILES.get('profile_picture')  # Get uploaded file, if any
+        # Debug: Print all POST data
+        print("POST data:", request.POST)
+        # Debug: Print all FILES data
+        print("FILES data:", request.FILES)
 
-        # Only update the user_profile fields if the data is provided or changed
-        if phone != user_profile.phone:
-            user_profile.phone = phone
+        # Get form data
+        phone = request.POST.get('phone', '').strip()
+        address = request.POST.get('address', '').strip()
 
-        if address != user_profile.address:
-            user_profile.address = address
+        # Debug: Print phone and address
+        print("Phone:", phone)
+        print("Address:", address)
 
-        if profile_picture:  # If there's a new profile picture
-            user_profile.profile_picture = profile_picture
+        # Update profile fields
+        user_profile.phone = phone
+        user_profile.address = address
 
-        user_profile.save()  # Save the UserProfile model
+        # Handle profile picture upload
+        if 'profile_picture' in request.FILES:
+            print("Profile picture uploaded:", request.FILES['profile_picture'])
+            user_profile.profile_picture = request.FILES['profile_picture']
 
+        # Save the updated profile
+        user_profile.save()
         messages.success(request, 'Profile updated successfully!')
-        return redirect('profile')  # Redirect to the profile view after saving
+        return redirect('profile')  # Redirect to the same profile page
 
-    return render(request, 'profile.html', {
-        'user': user,
-        'user_profile': user_profile,  # Pass user profile to the template
-    })
+    # Pass the user_profile and user objects to the template
+    context = {
+        'user_profile': user_profile,
+        'user': request.user,
+    }
+    return render(request, 'profile.html', context)
+
+
 
 def user_signup(request):
     if request.method == 'POST':
@@ -141,11 +158,10 @@ def user_signup(request):
         email = request.POST.get('email')
         password1 = request.POST.get('password1')
         password2 = request.POST.get('password2')
-        profile_photo = request.FILES.get('profile_photo')
 
-        # Check if email is provided
-        if not email:
-            messages.error(request, "Email is required.")
+        # Check if all required fields are provided
+        if not username or not email or not password1 or not password2:
+            messages.error(request, "All fields are required.")
             return render(request, 'signup.html')
 
         # Check if passwords match
@@ -160,7 +176,7 @@ def user_signup(request):
 
         # Create the user if validations pass
         user = User.objects.create_user(username=username, email=email, password=password1)
-        UserProfile.objects.create(user=user, profile_photo=profile_photo if profile_photo else None)  # Create profile
+        UserProfile.objects.create(user=user)  # Create profile
         auth_login(request, user)  # Log in the user after successful signup
         messages.success(request, "Signup successful. You are now logged in.")
         return redirect('login.html')  # Redirect to home or any other page after signup
@@ -228,25 +244,33 @@ def labour_dashboard(request):
 
     labour = request.user.labour_profile
     skills = labour.skills.all()
-
-    # Fetch the last booking history (if any)
+    
+    # Fetch the last 5 booking history
     booking_history = Booking.objects.filter(labour=labour).order_by('-booking_time')[:5]
 
-    # Handle profile update
+    # Fetch payment history
+    pending_payments = Payment.objects.filter(labour=labour, status="Pending")
+
     if request.method == 'POST':
         phone = request.POST.get('phone')
         experience = request.POST.get('experience')
         email = request.POST.get('email')
+        price = request.POST.get('price')  # Get price from the form
+        profile_image = request.FILES.get('image')  # Get uploaded image
 
-        # Validate phone and email
-        if len(phone) != 10:  # Example phone validation
+        if len(phone) != 10:
             messages.error(request, "Phone number must be 10 digits.")
-        elif not '@' in email:  # Example email validation
+        elif '@' not in email:
             messages.error(request, "Invalid email format.")
         else:
             labour.phone = phone
             labour.experience = experience
             labour.email = email
+            labour.price = price  # Update price
+
+            # Update profile image if provided
+            if profile_image:
+                labour.image = profile_image
 
             # Update skills
             selected_skills = request.POST.getlist('skills', [])
@@ -263,6 +287,7 @@ def labour_dashboard(request):
         'skills': skills,
         'booking_history': booking_history,
         'available_skills': available_skills,
+        'pending_payments': pending_payments,
     })
 
 # General read view to display users and labours
@@ -283,10 +308,26 @@ def logout(request):
     # Redirect to the home page (or wherever you want after logout)
     return redirect('home')
 
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.utils import timezone
+from datetime import timedelta, datetime
+from .models import Labour, Booking, History
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+
 @login_required
 def book_labour(request, labour_id):
-
     labour = get_object_or_404(Labour, id=labour_id)
+
+    # Check if the labour is available
+    if not labour.is_available and labour.last_booking_time:
+        time_since_last_booking = timezone.now() - labour.last_booking_time
+        if time_since_last_booking < timedelta(hours=1):
+            messages.error(request, f"This labourer is currently busy. They will be available in {60 - time_since_last_booking.seconds // 60} minutes.")
+            return redirect('services')
     
     if request.method == 'POST':
         full_name = request.POST.get('full_name')
@@ -301,14 +342,23 @@ def book_labour(request, labour_id):
                 messages.error(request, 'Invalid date format for expected time. Please use YYYY-MM-DD HH:MM:SS.')
                 return render(request, 'book_labour.html', {'labour': labour})
 
+        # Calculate the total amount based on labour's price
+        total_amount = labour.price if labour.price else 0
+
         # Create a booking
         booking = Booking.objects.create(
             user=request.user,
             labour=labour,
             expected_time=expected_time,
             email=email,
+            amount=total_amount,  # Set the amount
             status='pending',  # Set status to pending until payment is completed
         )
+
+         # Update labour's availability status and last booking time
+        labour.is_available = False
+        labour.last_booking_time = timezone.now()
+        labour.save()
 
         # Log the booking action to the history
         History.objects.create(
@@ -323,70 +373,60 @@ def book_labour(request, labour_id):
 
     return render(request, 'book_labour.html', {'labour': labour})
 
-
+from django.shortcuts import render, get_object_or_404
+from django.contrib import messages
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
+import razorpay
+from .models import Booking
 
 @login_required
-def payment_page(request, booking_id):
+def create_order(request, booking_id):
     booking = get_object_or_404(Booking, booking_id=booking_id)
     labour = booking.labour
 
     client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
     total_amount = booking.amount or (labour.price if labour and labour.price else 0)
+    amount_in_paise = int(total_amount * 100)
 
-    if request.method == 'POST':
-        amount_in_paise = int(total_amount * 100)
-        try:
-            # Create Razorpay order
-            razorpay_order = client.order.create({
-                'amount': amount_in_paise,
-                'currency': 'INR',
-                'payment_capture': '1'  # Auto-capture payment
-            })
-            print(f"Razorpay Order: {razorpay_order}")  # Debug API response
-
-            # Save Razorpay order ID to the booking
-            booking.razorpay_order_id = razorpay_order['id']
-            booking.save()
-            print(f"Saved Razorpay Order ID: {booking.razorpay_order_id}")  # Debug saved ID
-
-            # Define razorpay_order_id for the template
-            razorpay_order_id = razorpay_order['id']
-            print(f"Order ID Passed to Template: {razorpay_order_id}")  # Debug
-
-            # Render the payment page with Razorpay details
-            return render(request, 'payment_page.html', {
-                'booking': booking,
-                'razorpay_order_id': razorpay_order_id,  # Pass the order ID
-                'razorpay_key_id': settings.RAZORPAY_KEY_ID,
-                'amount': total_amount,
-            })
-
-        except razorpay.errors.BadRequestError as e:
-            print(f"Razorpay Bad Request Error: {str(e)}")  # Debug errors
-            messages.error(request, f"Bad request to Razorpay: {str(e)}")
-        except razorpay.errors.ServerError as e:
-            print(f"Razorpay Server Error: {str(e)}")  # Debug errors
-            messages.error(request, f"Razorpay server error: {str(e)}")
-        except Exception as e:
-            print(f"Unexpected Error: {str(e)}")  # Debug errors
-            messages.error(request, f"An unexpected error occurred: {str(e)}")
-
-        # If there's an error, redirect back to the payment page with an error message
+    if amount_in_paise < 100:
+        messages.error(request, "Amount must be at least ₹1.")
         return render(request, 'payment_page.html', {
             'booking': booking,
-            'error': 'Unable to initialize payment. Please try again later.',
+            'error': 'Amount must be at least ₹1.',
             'amount': total_amount,
         })
 
-    # For GET requests, render the payment page
+    try:
+        razorpay_order = client.order.create({
+            'amount': amount_in_paise,
+            'currency': 'INR',
+            'payment_capture': '1'
+        })
+
+        booking.razorpay_order_id = razorpay_order['id']
+        booking.save()
+
+        return render(request, 'payment_page.html', {
+            'booking': booking,
+            'razorpay_order_id': booking.razorpay_order_id,
+            'razorpay_key_id': settings.RAZORPAY_KEY_ID,
+            'amount': total_amount,
+            'amount_in_paise': amount_in_paise,
+        })
+
+    except razorpay.errors.BadRequestError as e:
+        messages.error(request, f"Bad request to Razorpay: {str(e)}")
+    except razorpay.errors.ServerError as e:
+        messages.error(request, f"Razorpay server error: {str(e)}")
+    except Exception as e:
+        messages.error(request, f"An unexpected error occurred: {str(e)}")
+
     return render(request, 'payment_page.html', {
         'booking': booking,
-        'razorpay_order_id': booking.razorpay_order_id,
-        'razorpay_key_id': settings.RAZORPAY_KEY_ID,
+        'error': 'Unable to initialize payment. Please try again later.',
         'amount': total_amount,
     })
-
-    
 
 @csrf_exempt
 def payment_success(request, booking_id):
@@ -398,7 +438,6 @@ def payment_success(request, booking_id):
         razorpay_signature = request.POST.get('razorpay_signature')
 
         try:
-            # Verify Razorpay payment
             client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
             client.utility.verify_payment_signature({
                 'razorpay_order_id': razorpay_order_id,
@@ -411,45 +450,56 @@ def payment_success(request, booking_id):
             booking.status = 'successful'
             booking.save()
 
-            print(f"Order ID Passed to Template: {razorpay_order['id']}")
+            # Update labour's availability
+            labour = booking.labour
+            labour.is_available = False
+            labour.last_booking_time = timezone.now()
+            labour.save()
 
-            # Generate PDF receipt
+            # Send confirmation email
             pdf_content = render_to_pdf('booking_success.html', {
                 'booking_id': booking.booking_id,
+                'service': 'Home Labour Service',
                 'labour': booking.labour.user.username,
-                'expected_time': booking.expected_time,
-                'amount': booking.labour.price,
+                'estimated_arrival': booking.expected_time,
+                'skills': booking.labour.skills.all(),
+                'payment_method': 'Razorpay',
+                'amount_paid': booking.amount,
+                'transaction_id': razorpay_payment_id,
+                'user_name': booking.user.username,
+                'user_email': booking.user.email,
+                'booking_date': booking.booking_time.strftime('%Y-%m-%d %H:%M:%S'),
+                'is_email': False,
             })
+            send_booking_email(booking, pdf_content, amount=booking.amount)
 
-            # Send confirmation email with PDF receipt
-            send_booking_email(booking, pdf_content, amount=booking.labour.price)
-
-            # Log payment in history
+            # Log the payment action
             History.objects.create(
                 user=request.user,
                 action_type='Payment',
                 service='Home Help Service',
-                details=f"Payment of ₹{booking.labour.price} for Booking ID {booking.booking_id} was successful."
+                details=f"Payment of ₹{booking.amount} for Booking ID {booking.booking_id} was successful."
             )
 
             messages.success(request, 'Payment successful!')
             return redirect('booking_success', booking_id=booking.booking_id)
 
-        except razorpay.errors.SignatureVerificationError:
+        except razorpay.errors.SignatureVerificationError as e:
             messages.error(request, 'Payment verification failed. Please try again.')
-            return redirect('payment_failure')
+            return redirect('payment_failure', booking_id=booking.booking_id)
 
         except Exception as e:
             messages.error(request, f'An error occurred: {str(e)}')
-            return redirect('payment_failure')
+            return redirect('payment_failure', booking_id=booking.booking_id)
 
-    return render(request, 'payment_failure.html')
+    return render(request, 'payment_failure.html', {'booking_id': booking_id})
 
 
-
-def payment_failure(request):
+def payment_failure(request, booking_id):
+    booking = get_object_or_404(Booking, booking_id=booking_id)
     return render(request, 'payment_failure.html', {
         'message': 'Unfortunately, your payment could not be processed. Please try again or contact support.',
+        'booking': booking,
     })
 def send_booking_email(booking, pdf_content, amount):
     subject = 'Booking Confirmation'
@@ -473,40 +523,74 @@ def send_booking_email(booking, pdf_content, amount):
 
 @login_required
 def booking_success(request, booking_id):
-    # Fetch the booking using the booking_id (assuming it's a string field in the model)
     booking = get_object_or_404(Booking, booking_id=booking_id)
 
     context = {
         'booking_id': booking.booking_id,
         'service': 'Home Labour Service',
         'labour': booking.labour.user.username,
-        'estimated_arrival': booking.expected_time,
+        'estimated_arrival': booking.expected_time.strftime('%Y-%m-%d %H:%M:%S'),
         'skills': booking.labour.skills.all(),
+        'payment_method': 'Razorpay',
+        'amount_paid': booking.amount,
+        # 'transaction_id': razorpay_payment_id,
+        'user_name': booking.user.username,
+        'user_email': booking.user.email,
+        'booking_date': booking.booking_time.strftime('%Y-%m-%d %H:%M:%S'),
+        'is_email': False,  # Indicates this is for browser rendering
     }
 
-    if request.GET.get('download') == 'pdf':
-        return render_to_pdf('booking_success.html', context)  # Render PDF if requested
-    
-    return render(request, 'booking_success.html', context)  # Render normal template
+    return render(request, 'booking_success.html', context)
 
+from django.utils import timezone
+from datetime import timedelta
+from django.core.paginator import Paginator
+from django.db.models import Avg, Q
+from django.shortcuts import render
+from .models import Labour, Review
 
 def services(request):
     query = request.GET.get('query', '')
     
+    # Filter labours based on skills or name (case-insensitive search)
     if query:
-        # Filter the labours based on their skills (case-insensitive search)
-        labours = Labour.objects.filter(skills__name__icontains=query).distinct()
+        labours = Labour.objects.filter(
+            Q(skills__name__icontains=query) | Q(user__username__icontains=query)
+        ).distinct()
     else:
-        # If no search query, retrieve all labour records
         labours = Labour.objects.all()
-     # Calculate average rating for each labour
-    
+
+    # Prefetch related reviews to optimize database queries
+    labours = labours.prefetch_related('reviews')
+
+    # Calculate average rating and availability status for each labour
     for labour in labours:
+        # Calculate average rating
         avg_rating = labour.reviews.aggregate(Avg('rating'))['rating__avg']
-        # Check if avg_rating is not None and round it to one decimal place
         labour.avg_rating = round(avg_rating, 1) if avg_rating is not None else 'N/A'
 
-    return render(request, 'services.html', {'labours': labours, 'query': query}) 
+        # Calculate availability status
+        if not labour.is_available and labour.last_booking_time:
+            time_since_last_booking = timezone.now() - labour.last_booking_time
+            if time_since_last_booking < timedelta(hours=1):
+                labour.availability_message = f"Available in {60 - time_since_last_booking.seconds // 60} minutes"
+            else:
+                labour.is_available = True  # Mark as available if 1 hour has passed
+                labour.save()
+        else:
+            labour.availability_message = "Available"
+
+    # Pagination: Show 4 labours per page
+    paginator = Paginator(labours, 4)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'services.html', {
+        'page_obj': page_obj,
+        'query': query,
+    })
+
+
 
 @login_required
 def profile(request):
@@ -516,21 +600,26 @@ def contact(request):
 # Booking and history for logged-in users
 @login_required
 def booking_history(request):
-    # Fetch bookings and prefetch related labour and skills
+    # Fetch bookings for the logged-in user
     bookings = Booking.objects.filter(user=request.user).prefetch_related('labour__skills').order_by('-expected_time')
 
-    # Fetch user history
+    # Fetch user history (actions like bookings, transactions, etc.)
     histories = History.objects.filter(user=request.user).order_by('-timestamp')
-     # Fetch reviews for each booking
-    # for booking in bookings:
-    #     booking.reviews = Review.objects.filter(booking=booking)
-    # Render booking and history in the same template
+
+    # Fetch payment history for the user
+    payments = Payment.objects.filter(user=request.user).order_by('-created_at')
+
+    # Fetch reviews for each labour associated with the bookings
+    for booking in bookings:
+        booking.reviews = Review.objects.filter(labour=booking.labour, user=request.user)
+
+    # Render booking, history, and payment history in the same template
     return render(request, 'history.html', {
         'username': request.user.username,
         'bookings': bookings,
-        'histories': histories
+        'histories': histories,
+        'payments': payments
     })
-
 @login_required
 def review_labour(request, labour_id):
     labour = get_object_or_404(Labour, id=labour_id)
@@ -556,7 +645,7 @@ def review_labour(request, labour_id):
 @login_required
 def labour_detail(request, labour_id):
     labour = get_object_or_404(Labour, id=labour_id)
-    return render(request, 'labour_detail.html', {'labour': labour})
+    return render(request, 'labour_detail.html', {'labour': labour, 'is_available': labour.is_available,})
 
 
 
@@ -571,3 +660,101 @@ def transaction_history(request):
     return render(request, 'transaction_history.html', context)
 
 
+
+from django.core.mail import send_mail
+from django.conf import settings
+
+def contact(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        # phone = request.POST.get('phone')
+        message = request.POST.get('message')
+
+        # Send email
+        subject = f"New Contact Form Submission from {name}"
+        email_message = f"""
+        Name: {name}
+        Email: {email}
+        Message: {message}
+        """
+        send_mail(
+            subject,
+            email_message,
+            settings.EMAIL_HOST_USER,  # From email
+            [settings.EMAIL_HOST_USER],  # To email
+            fail_silently=False,
+        )
+
+        # Optionally, you can add a success message
+        messages.success(request, 'Your message has been sent successfully!')
+        return redirect('contact')  # Redirect to the same page after submission
+
+    return render(request, 'contact.html')
+
+def about(request):
+    return render(request, 'about.html')
+
+
+# Custom Admin Panel
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Labour, Booking, User, History
+from .forms import LabourForm, BookingForm
+
+@login_required
+def dashboard(request):
+    context = {
+        'total_labours': Labour.objects.count(),
+        'total_bookings': Booking.objects.count(),
+        'total_users': User.objects.count(),
+        'recent_history': History.objects.order_by('-timestamp')[:10],  # Last 10 activities
+    }
+    print(context)
+    return render(request, 'admin/Custom_admin_dashboard.html', context)
+
+@login_required
+def manage_users(request):
+    users = User.objects.all()
+    return render(request, 'admin/Custom_admin_dashboard.html', {'users': users, 'active_tab': 'users'})
+
+@login_required
+def manage_labours(request):
+    labours = Labour.objects.all()
+    return render(request, 'admin/Custom_admin_dashboard.html', {'labours': labours, 'active_tab': 'labours'})
+
+@login_required
+def manage_bookings(request):
+    bookings = Booking.objects.all()
+    return render(request, 'admin/Custom_admin_dashboard.html', {'bookings': bookings, 'active_tab': 'bookings'})
+
+@login_required
+def add_labour(request):
+    if request.method == 'POST':
+        form = LabourForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('manage_labours')
+    else:
+        form = LabourForm()
+    return render(request, 'admin/Custom_admin_dashboard.html', {'form': form, 'active_tab': 'labours'})
+
+@login_required
+def edit_labour(request, labour_id):
+    labour = get_object_or_404(Labour, id=labour_id)
+    if request.method == 'POST':
+        form = LabourForm(request.POST, request.FILES, instance=labour)
+        if form.is_valid():
+            form.save()
+            return redirect('manage_labours')
+    else:
+        form = LabourForm(instance=labour)
+    return render(request, 'admin/Custom_admin_dashboard.html', {'form': form, 'active_tab': 'labours'})
+
+@login_required
+def delete_labour(request, labour_id):
+    labour = get_object_or_404(Labour, id=labour_id)
+    labour.delete()
+    return redirect('manage_labours')

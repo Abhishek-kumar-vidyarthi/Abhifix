@@ -4,196 +4,299 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Book Labour</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
     <style>
-        /* Global Styles */
         body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
             background-color: #f4f7fa;
-            margin: 0;
-            padding: 0;
-            color: #444;
+            font-family: 'Arial', sans-serif;
         }
         .navbar {
-            background: #ff8c00; /* Orange color for the navbar */
-            color: #fff;
+            background-color: #FF5722;
             padding: 15px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
         }
-        .navbar h2 {
-            margin: 0;
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white !important;
         }
-        .navbar ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            display: flex;
+        .navbar-nav .nav-link {
+            color: white !important;
+            margin: 0 10px;
+            font-size: 1.1rem;
         }
-        .navbar ul li {
-            margin-left: 20px;
-            position: relative; /* For dropdown positioning */
+        .navbar-nav .nav-link:hover {
+            text-decoration: underline;
         }
-        .navbar ul li a {
-            color: #fff; /* White text for links */
-            text-decoration: none;
+        .dropdown-menu {
+            background-color: #FF5722;
         }
-        .navbar ul li a:hover {
-            text-decoration: underline; /* Underline on hover */
+        .dropdown-item {
+            color: white !important;
         }
-        .dropdown-content {
-            display: none; /* Hidden by default */
-            position: absolute;
-            background-color: #ff8c00; /* Match the navbar color */
-            min-width: 160px;
-            z-index: 1;
-            border-radius: 5px;
-        }
-        .dropdown-content a {
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-            color: white;
-        }
-        .dropdown-content a:hover {
-            background-color: #e67e22; /* Darker orange on hover */
-        }
-        .navbar ul li:hover .dropdown-content {
-            display: block; /* Show dropdown on hover */
+        .dropdown-item:hover {
+            background-color: #0056b3;
         }
         .container {
+            margin-top: 80px;
             max-width: 600px;
-            margin: 80px auto;
-            padding: 30px;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         h1 {
-            text-align: center;
             color: #007bff;
             font-size: 28px;
             margin-bottom: 20px;
-        }
-        p {
             text-align: center;
-            font-size: 16px;
-            color: #666;
         }
-        p a {
-            color: #007bff;
-            text-decoration: none;
-            font-weight: bold;
+        .form-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-        p a:hover {
-            text-decoration: underline;
-        }
-
-        /* Form Styles */
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        input[type="text"],
-        input[type="email"],
-        textarea,
-        select {
+        .form-control {
             padding: 12px;
             font-size: 16px;
-            border: 1px solid #ccc;
             border-radius: 6px;
-            width: 100%;
-            box-sizing: border-box;
+            border: 1px solid #ccc;
+            margin-bottom: 15px;
         }
-        input[type="text"]:focus,
-        input[type="email"]:focus,
-        textarea:focus,
-        select:focus {
+        .form-control:focus {
             border-color: #007bff;
-            outline: none;
             box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
         }
-
         textarea {
             resize: none;
         }
-
-        /* Button Styles */
-        button {
-            padding: 12px;
-            margin-top: 20px;
-            border: none;
+        .btn-primary {
             background-color: #007bff;
-            color: white;
-            border-radius: 6px;
+            border: none;
+            padding: 12px;
             font-size: 18px;
-            cursor: pointer;
+            border-radius: 6px;
             transition: background-color 0.3s ease;
         }
-        button:hover {
+        .btn-primary:hover {
             background-color: #0056b3;
         }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .container {
-                margin: 20px auto;
-                padding: 20px;
-            }
-            h1 {
-                font-size: 24px;
-            }
+        .labour-card {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .labour-card img {
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+        }
+        .labour-card h3 {
+            font-size: 1.5rem;
+            color: #333;
+            margin-top: 10px;
+        }
+        .labour-card p {
+            color: #666;
+            margin: 5px 0;
+        }
+        .availability-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .available {
+            background-color: #28a745;
+            color: white;
+        }
+        .unavailable {
+            background-color: #dc3545;
+            color: white;
+        }
+        .countdown {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+        .progress-bar {
+            background-color: #007bff;
+        }
+        .confirmation-modal .modal-content {
+            border-radius: 10px;
+        }
+        .confirmation-modal .modal-header {
+            background-color: #007bff;
+            color: white;
+            border-radius: 10px 10px 0 0;
+        }
+        .confirmation-modal .modal-body {
+            padding: 20px;
+        }
+        .confirmation-modal .modal-footer {
+            border-top: none;
         }
     </style>
 </head>
 <body>
     <!-- Navbar -->
-    <div class="navbar">
-        <h2 class="logo">Abhifix</h2>
-        <ul>
-            <li><a href="{% url 'home' %}">Home</a></li>
-            {% if user.is_authenticated %}
-            <li>
-                <a href="#">Profile</a>
-                <div class="dropdown-content">
-                    <a href="{% url 'profile' %}">View Profile</a>
-                    <a href="{% url 'logout' %}">Logout</a>
-                    <a href="{% url 'profile' %}">Edit Profile</a>
-                </div>
-            </li>
-            {% else %}
-            <li><a href="{% url 'login' %}">User_Login</a></li>
-            {% endif %}
-            <li><a href="#">About</a></li>
-            <li><a href="{% url 'services' %}">Service</a></li>
-            <li><a href="{% url 'contact' %}">Contact</a></li>
-            <li><a href="{% url 'labour_login' %}">Worker_Login</a></li>
-        </ul>
-    </div>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'home' %}">Abhifix</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home' %}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'services' %}">Service</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'contact' %}">Contact</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'labour_login' %}">Worker_Login</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Profile
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="{% url 'profile' %}">View Profile</a></li>
+                            <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
+                            <li><a class="dropdown-item" href="{% url 'profile' %}">Edit Profile</a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">User_Login</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
 
+    <!-- Main Content -->
     <div class="container">
         <h1>Book Labour</h1>
-        {% if user.is_authenticated %}
-        <form method="post" action="{% url 'book_labour' labour_id=labour.id %}">
-            {% csrf_token %}
-            <!-- User Details -->
-            <input type="text" name="full_name" placeholder="Full Name" required>
-            <input type="email" name="email" placeholder="Email" required>
+        <!-- Progress Bar -->
+        <div class="progress mb-4">
+            <div class="progress-bar" role="progressbar" style="width: 50%;" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">Step 1 of 2</div>
+        </div>
 
-            <!-- Address Details -->
-            <input type="text" name="address_line_1" placeholder="Address Line 1" required>
-            <input type="text" name="address_line_2" placeholder="Address Line 2 (Optional)">
-            <input type="text" name="city" placeholder="City" required>
-            <input type="text" name="state" placeholder="State/Province" required>
-            <textarea name="additional_instructions" placeholder="Additional Instructions (Optional)" rows="4"></textarea>
+        <!-- Labour Card -->
+        <div class="labour-card">
+            <img src="{{ labour.profile_picture.url }}" alt="{{ labour.user.username }}">
+            <h3>{{ labour.user.username }}</h3>
+            <p>{{ labour.skills }}</p>
+            <p><strong>Price:</strong> ₹{{ labour.price }}/hour</p>
+            <!-- Availability Badge -->
+            {% if labour.is_available %}
+                <div class="availability-badge available">Available Now</div>
+            {% else %}
+                <div class="availability-badge unavailable">Currently Busy</div>
+                <div class="countdown mt-2">
+                    Available in <span id="countdown-timer">{{ labour.available_in_minutes }}</span> minutes
+                </div>
+            {% endif %}
+        </div>
 
-            <!-- Submit Button -->
-            <button type="submit">Confirm Booking</button>
-        </form>
-        {% else %}
-        <p>You need to <a href="{% url 'login' %}">login</a> to book a labour.</p>
-        {% endif %}
+        <!-- Booking Form -->
+        <div class="form-container">
+            {% if user.is_authenticated %}
+            <form id="bookingForm" method="post" action="{% url 'book_labour' labour_id=labour.id %}">
+                {% csrf_token %}
+                <!-- User Details -->
+                <div class="mb-3">
+                    <input type="text" class="form-control" name="full_name" placeholder="Full Name" required>
+                </div>
+                <div class="mb-3">
+                    <input type="email" class="form-control" name="email" placeholder="Email" required>
+                </div>
+
+                <!-- Address Details -->
+                <div class="mb-3">
+                    <input type="text" class="form-control" name="address_line_1" placeholder="Address Line 1" required>
+                </div>
+                <div class="mb-3">
+                    <input type="text" class="form-control" name="address_line_2" placeholder="Address Line 2 (Optional)">
+                </div>
+                <div class="mb-3">
+                    <input type="text" class="form-control" name="city" placeholder="City" required>
+                </div>
+                <div class="mb-3">
+                    <input type="text" class="form-control" name="state" placeholder="State/Province" required>
+                </div>
+                <div class="mb-3">
+                    <textarea class="form-control" name="additional_instructions" placeholder="Additional Instructions (Optional)" rows="4"></textarea>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#confirmationModal" {% if not labour.is_available %}disabled{% endif %}>
+                    {% if labour.is_available %}Proceed to Payment{% else %}Labour Unavailable{% endif %}
+                </button>
+            </form>
+            {% else %}
+            <p class="text-center">You need to <a href="{% url 'login' %}">login</a> to book a labour.</p>
+            {% endif %}
+        </div>
     </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal fade confirmation-modal" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmationModalLabel">Confirm Booking</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to proceed with the booking?</p>
+                    <p><strong>Labour:</strong> {{ labour.user.username }}</p>
+                    <p><strong>Price:</strong> ₹{{ labour.price }}/hour</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="submitForm()">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function submitForm() {
+            document.getElementById('bookingForm').submit();
+        }
+
+        // Countdown Timer
+        {% if not labour.is_available %}
+            let minutesLeft = {{ labour.available_in_minutes }};
+            const countdownElement = document.getElementById('countdown-timer');
+
+            const countdownInterval = setInterval(() => {
+                minutesLeft--;
+                countdownElement.textContent = minutesLeft;
+
+                if (minutesLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    location.reload(); // Reload the page to update availability status
+                }
+            }, 60000); // Update every minute
+        {% endif %}
+    </script>
 </body>
 </html>
