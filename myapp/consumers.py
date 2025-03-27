@@ -5,11 +5,11 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 class NotificationConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         try:
-            # Get the user ID from the URL
+            
             self.user_id = self.scope['url_route']['kwargs']['user_id']
             self.group_name = f'user_{self.user_id}'
 
-            # Add the user to the group
+            
             await self.channel_layer.group_add(
                 self.group_name,
                 self.channel_name
